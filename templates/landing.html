@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+
+{% block title %}Substacker - AI Cost Intelligence Platform{% endblock %}
+
+{% block content %}
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Substacker</span>
+            </div>
+            <div class="navbar-menu">
+                <a href="/#how-it-works">How It Works</a>
+                <a href="/#problem">Problem</a>
+                <a href="/realtime">Real-Time</a>
+                <a href="/csv-guide">CSV Guide</a>
+                <a href="/#faq">FAQ</a>
+                <a href="/analyzer" class="nav-cta">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        
+        <div class="container hero-content">
+            <!-- Alert Banner -->
+            <div class="alert-banner">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="17 6 23 6 23 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Your AI bill is growing. Which team should optimize?
+            </div>
+            
+            <h1 class="hero-title">
+                <span class="gradient-text">See which teams are spending on AI</span>
+            </h1>
+            
+            <p class="hero-subtitle">
+                Your VP Eng knows AI is expensive. Your CFO knows the total bill.<br>
+                <strong>But nobody knows the breakdown by team.</strong><br>
+                <strong>Substacker changes that in 2 minutes.</strong>
+            </p>
+            
+            <!-- Social Proof -->
+            <div class="social-proof">
+                <div class="proof-item">
+                    <div class="proof-value">{{ stats.total_leads }}+</div>
+                    <div class="proof-label">Teams Analyzed</div>
+                </div>
+                <div class="proof-item">
+                    <div class="proof-value">4</div>
+                    <div class="proof-label">AI Providers</div>
+                </div>
+                <div class="proof-item">
+                    <div class="proof-value">25+</div>
+                    <div class="proof-label">Models Supported</div>
+                </div>
+            </div>
+            
+            <!-- Email Capture Form -->
+            <div class="email-capture">
+                <form id="emailForm" class="capture-form">
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           placeholder="your@company.com" 
+                           required>
+                    <button type="submit" class="cta-button primary-button">
+                        <span>Analyze Your Teams</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 8px;">
+                            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </form>
+                <p class="privacy-text">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px; vertical-align: middle;">
+                        <rect x="5" y="11" width="14" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Free analysis. No credit card. Data deleted after analysis.
+                </p>
+                <p style="margin-top: 15px; font-size: 0.95rem;">
+                    <a href="/csv-guide" style="color: var(--accent); text-decoration: none; font-weight: 600;">
+                        📖 View CSV format guide
+                    </a> • 
+                    <a href="/api/csv-template" style="color: var(--accent); text-decoration: none; font-weight: 600;">
+                        📥 Download template
+                    </a>
+                </p>
+            </div>
+            
+            <!-- Hero Demo Video -->
+            <div class="hero-image-container">
+                <div class="demo-video-wrapper">
+                    <!-- Loading Skeleton -->
+                    <div class="demo-loading-skeleton" id="demoSkeleton">
+                        <div class="skeleton-shimmer"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-pulse"></div>
+                            <p>Loading demo...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Actual Demo GIF -->
+                    <img 
+                        src="/static/substacker_product_demo.gif" 
+                        alt="Substacker Platform Demo - Real-time Team AI Cost Attribution" 
+                        class="hero-image demo-gif"
+                        id="demoGif"
+                        loading="lazy"
+                        onload="handleDemoLoad()"
+                        onerror="handleDemoError()">
+                    
+                    <!-- Play Indicator Badge -->
+                    <div class="demo-badge">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="liveDemoIconTitle">
+                            <title id="liveDemoIconTitle">Live Demo - Play video demonstration</title>
+                            <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+                            <polygon points="10,8 16,12 10,16" fill="currentColor"/>
+                        </svg>
+                        <span>Live Demo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- The Problem Section -->
+    <section class="problem" id="problem">
+        <div class="container">
+            <div class="section-header">
+                <h2>The Real Problem</h2>
+                <p class="section-subtitle">You have visibility everywhere except here</p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3>Invisible Costs</h3>
+                    <p>You see total spend. You don't see which team spent what. Marketing? Engineering? Data Science? Unknown.</p>
+                </div>
+
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3>No Accountability</h3>
+                    <p>Without visibility, nobody owns the problem. Everyone assumes it's someone else's budget.</p>
+                </div>
+
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="17 6 23 6 23 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>Unlimited Growth</h3>
+                    <p>Bills keep growing. You can't optimize what you can't see. First step: visibility.</p>
+                </div>
+            </div>
+
+            <div class="case-study">
+                <div class="case-study-content">
+                    <blockquote>
+                        The moment we showed teams their individual costs, behavior changed. No mandates needed.
+                    </blockquote>
+                    <div class="case-study-author">
+                        <div class="author-avatar">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="8" r="5" stroke="currentColor" stroke-width="2"/>
+                                <path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="author-info">
+                            <strong>Engineering Leader</strong>
+                            <span>Series B Startup</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>Three Steps to Visibility</h2>
+                <p class="section-subtitle">Upload → Analyze → See the Breakdown</p>
+            </div>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>1. Export Your Data</h3>
+                    <p>CSV export from OpenAI, Claude, Gemini, or Azure <br><a href="/csv-guide" style="font-size: 0.85rem; color: #667eea;">See format guide →</a></p>
+                </div>
+                
+                <div class="step-arrow">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                
+                <div class="step">
+                    <div class="step-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="18" y1="20" x2="18" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="20" x2="12" y2="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="6" y1="20" x2="6" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>2. Upload & Analyze</h3>
+                    <p>We calculate costs by team in seconds</p>
+                </div>
+                
+                <div class="step-arrow">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                
+                <div class="step">
+                    <div class="step-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="22 12 12 12 12 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>3. Get Your Breakdown</h3>
+                    <p>Marketing: $2,847 | Engineering: $5,230 | Data: $1,456</p>
+                </div>
+            </div>
+            
+            <!-- Sample Results Preview -->
+            <div class="results-preview">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="22 12 12 12 12 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Team-Level Cost Breakdown
+                    </div>
+                    <div class="preview-stats">
+                        <div class="stat">
+                            <span class="stat-label">Marketing</span>
+                            <span class="stat-value">$2,850</span>
+                            <span class="stat-detail">gpt-4, gpt-3.5</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Engineering</span>
+                            <span class="stat-value">$4,200</span>
+                            <span class="stat-detail">claude-3, gpt-4</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Data Science</span>
+                            <span class="stat-value">$1,950</span>
+                            <span class="stat-detail">gemini, gpt-3.5</span>
+                        </div>
+                    </div>
+                    <div class="preview-recommendations">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <polyline points="22 4 12 14.01 9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            What Changes
+                        </h4>
+                        <ul>
+                            <li><strong>Accountability:</strong> Teams see their actual spend</li>
+                            <li><strong>Optimization:</strong> Engineering focused on Claude for cost</li>
+                            <li><strong>Governance:</strong> Marketing gets budget guidance</li>
+                            <li><strong>Conversations:</strong> CFO has numbers for budget planning</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Why It Matters -->
+    <section class="problem" id="why-it-matters" style="background: var(--white);">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why This Matters Now</h2>
+                <p class="section-subtitle">AI spend is accelerating. Visibility is the first step to control.</p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3>For VP Engineering</h3>
+                    <p>Know which teams are spending, where optimization opportunities are, and plan growth intelligently.</p>
+                </div>
+
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <line x1="12" y1="1" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3>For Finance</h3>
+                    <p>Understand AI as a line item. See which departments drive costs. Plan budgets accordingly.</p>
+                </div>
+
+                <div class="problem-card">
+                    <div class="card-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 1v6m0 6v6M23 12h-6m-6 0H1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>For Team Leads</h3>
+                    <p>See your team's spending. Understand the impact. Optimize because numbers are real.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Multi-Provider Section -->
+    <section class="providers" style="background: var(--gray-50); padding: 80px 0;">
+        <div class="container">
+            <div class="section-header">
+                <h2>Works With All Major AI Providers</h2>
+                <p class="section-subtitle">Not just OpenAI. Claude, Gemini, Azure, and more.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-top: 50px;">
+                <div style="text-align: center; padding: 30px 20px; background: white; border-radius: 12px; border: 1px solid var(--gray-200); transition: all 0.3s ease;" class="provider-card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #10a37f 0%, #0d8b6f 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="white" stroke-width="2" fill="none"/>
+                            <path d="M12 7v5l3 3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">OpenAI</h3>
+                    <p style="color: var(--gray-600);">GPT-4, GPT-3.5-turbo</p>
+                </div>
+                <div style="text-align: center; padding: 30px 20px; background: white; border-radius: 12px; border: 1px solid var(--gray-200); transition: all 0.3s ease;" class="provider-card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #D97757 0%, #C86648 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Anthropic</h3>
+                    <p style="color: var(--gray-600);">Claude 3 (Opus, Sonnet, Haiku)</p>
+                </div>
+                <div style="text-align: center; padding: 30px 20px; background: white; border-radius: 12px; border: 1px solid var(--gray-200); transition: all 0.3s ease;" class="provider-card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #4285F4 0%, #357ABD 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2" stroke="white" stroke-width="2" fill="none"/>
+                            <polyline points="2 17 12 22 22 17" stroke="white" stroke-width="2"/>
+                            <polyline points="2 12 12 17 22 12" stroke="white" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Google</h3>
+                    <p style="color: var(--gray-600);">Gemini Pro, Flash</p>
+                </div>
+                <div style="text-align: center; padding: 30px 20px; background: white; border-radius: 12px; border: 1px solid var(--gray-200); transition: all 0.3s ease;" class="provider-card">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0078D4 0%, #005A9E 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" fill="none" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 style="color: var(--primary); margin-bottom: 10px;">Azure</h3>
+                    <p style="color: var(--gray-600);">OpenAI on Azure</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know</p>
+            </div>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What is Substacker?</h3>
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                    <p class="faq-answer">Substacker is an AI cost intelligence platform that breaks down your AI spending by team. Unlike provider dashboards that show total spend, we give you team-level attribution - showing exactly which teams spend what on OpenAI, Claude, Gemini, and Azure. One CSV upload, 2 minutes, complete visibility.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How Does It Work?</h3>
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                    <p class="faq-answer">Export your usage data from any AI provider (CSV format), upload it to Substacker, and we instantly analyze it. Our algorithm identifies team ownership through API keys, email domains, or team tags in your data. Results show costs by team, model usage, and optimization recommendations - all without storing your raw data.</p>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What About Pricing?</h3>
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                    <p class="faq-answer">First analysis is completely free - no credit card required. We're building premium features (real-time dashboards, budget enforcement, automated alerts) that will be available soon. For now, focus on getting your initial team cost breakdown and understanding the value.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="final-cta">
+        <div class="cta-background">
+            <div class="gradient-orb orb-3"></div>
+            <div class="gradient-orb orb-4"></div>
+        </div>
+        
+        <div class="container final-cta-content">
+            <h2>See Your Team's AI Spending</h2>
+            <p class="cta-subtitle">
+                The first step to cost control is visibility.
+            </p>
+            
+            <p style="font-size: 1.1rem; color: #e5e7eb; margin-bottom: 30px;">
+                Know which teams are spending. Make informed decisions.
+            </p>
+            
+            <div class="email-capture final-form">
+                <form id="footerEmailForm" class="capture-form">
+                    <input type="email" 
+                           name="email" 
+                           placeholder="your@company.com" 
+                           required>
+                    <button type="submit" class="cta-button primary-button">
+                        <span>Get Your Breakdown</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+            
+            <p class="trust-badge">
+                <i class="fas fa-lock"></i> Free. Secure. 2 minutes.
+            </p>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-brand">
+                    <div class="footer-logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <strong>Substacker</strong>
+                    </div>
+                    <p>Team-level AI cost intelligence for modern engineering teams.</p>
+                </div>
+                <div class="footer-section">
+                    <strong>Product</strong>
+                    <ul>
+                        <li><a href="/analyzer">Analyzer</a></li>
+                        <li><a href="/realtime">Real-Time</a></li>
+                        <li><a href="/csv-guide">CSV Guide</a></li>
+                        <li><a href="/api/csv-template">Download Template</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <strong>Resources</strong>
+                    <ul>
+                        <li><a href="/#how-it-works">How It Works</a></li>
+                        <li><a href="/#faq">FAQ</a></li>
+                        <li><a href="/dev_docs">Developer Docs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <strong>Legal</strong>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© {{ current_year }} Substacker. All rights reserved.</p>
+                <p class="footer-tagline">AI Cost Intelligence Platform</p>
+            </div>
+        </div>
+    </footer>
+
+{% endblock %}

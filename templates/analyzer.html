@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substacker - AI Cost Attribution by Team</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/landing.css">
+    <link rel="stylesheet" href="/static/analyzer.css">
+    
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "tx9c01sb6z");
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <span>Substacker</span>
+            </div>
+            <div class="navbar-menu">
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="analyzer-container">
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="container">
+                <div class="upload-header">
+                    <h1>See Your Team's AI Spending</h1>
+                    <p class="subtitle">Choose how you want to connect</p>
+                </div>
+
+                <!-- Method Selection -->
+                <div class="method-selection" id="methodSelection" style="text-align: center; margin-bottom: 40px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto;">
+                        <button class="method-button primary" onclick="showUploadInterface()" style="padding: 20px; font-size: 1.1em; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <span style="font-weight: 600;">Upload CSV</span>
+                            <small style="font-size: 0.85em; opacity: 0.8;">One-time analysis</small>
+                        </button>
+                        
+                        <button class="method-button primary" onclick="showSDKSetup()" style="padding: 20px; font-size: 1.1em; display: flex; flex-direction: column; align-items: center; gap: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <span style="font-weight: 600;">SDK Integration</span>
+                            <small style="font-size: 0.85em; opacity: 0.8;">Real-time tracking</small>
+                        </button>
+                        
+                        <button id="tryDemo" class="method-button secondary" style="padding: 20px; font-size: 1.1em; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <span style="font-weight: 600;">Try Demo</span>
+                            <small style="font-size: 0.85em; opacity: 0.8;">Sample data</small>
+                        </button>
+                    </div>
+                    
+                    <p style="color: #666; font-size: 0.9em; margin-top: 30px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <strong>New:</strong> SDK integration now available for automatic real-time tracking!
+                    </p>
+                </div>
+
+                <!-- SDK Setup Wizard (Hidden by default) -->
+                <div class="sdk-setup-wizard" id="sdkSetup" style="display: none;">
+                    <div class="wizard-header">
+                        <button class="back-button" onclick="showMethodSelection()">
+                            ← Back to options
+                        </button>
+                        <h2>Set Up Real-Time Integration</h2>
+                    </div>
+
+                    <!-- Step 1: Generate API Key -->
+                    <div class="wizard-step" id="step1">
+                        <div class="step-indicator">
+                            <span class="step-number active">1</span>
+                            <span class="step-line"></span>
+                            <span class="step-number">2</span>
+                            <span class="step-line"></span>
+                            <span class="step-number">3</span>
+                        </div>
+
+                        <div class="step-content">
+                            <h3>Step 1: Get Your API Key</h3>
+                            <p>Generate your unique Substacker API key. Keep it secret!</p>
+                            
+                            <button id="generateKeyBtn" class="generate-btn">
+                                🔑 Generate API Key
+                            </button>
+
+                            <div id="apiKeyDisplay" class="api-key-display" style="display: none;">
+                                <div class="key-box">
+                                    <code id="apiKeyValue"></code>
+                                    <button class="copy-btn" onclick="copyAPIKey()">
+                                        📋 Copy
+                                    </button>
+                                </div>
+                                <p class="warning-text">
+                                    ⚠️
+                                    Save this key now! You won't be able to see it again.
+                                </p>
+                                <button class="next-btn" onclick="goToStep2()">
+                                    Next: Install SDK →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Install SDK -->
+                    <div class="wizard-step" id="step2" style="display: none;">
+                        <div class="step-indicator">
+                            <span class="step-number completed">✓</span>
+                            <span class="step-line"></span>
+                            <span class="step-number active">2</span>
+                            <span class="step-line"></span>
+                            <span class="step-number">3</span>
+                        </div>
+
+                        <div class="step-content">
+                            <h3>Step 2: Install SDK</h3>
+                            
+                            <div class="language-tabs">
+                                <button class="lang-tab active" onclick="showLanguage('python')">Python</button>
+                                <button class="lang-tab" onclick="showLanguage('javascript')">JavaScript</button>
+                            </div>
+
+                            <div class="code-block" id="pythonCode">
+                                <pre><code>pip install substacker-sdk</code></pre>
+                                <button class="copy-btn" onclick="copyCode('pip install substacker-sdk')">
+                                    📋 Copy
+                                </button>
+                            </div>
+
+                            <div class="code-block" id="javascriptCode" style="display: none;">
+                                <pre><code>npm install @substacker/sdk</code></pre>
+                                <button class="copy-btn" onclick="copyCode('npm install @substacker/sdk')">
+                                    📋 Copy
+                                </button>
+                            </div>
+
+                            <button class="next-btn" onclick="goToStep3()">
+                                Next: Add Code →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Add Code -->
+                    <div class="wizard-step" id="step3" style="display: none;">
+                        <div class="step-indicator">
+                            <span class="step-number completed">✓</span>
+                            <span class="step-line"></span>
+                            <span class="step-number completed">✓</span>
+                            <span class="step-line"></span>
+                            <span class="step-number active">3</span>
+                        </div>
+
+                        <div class="step-content">
+                            <h3>Step 3: Add One Line of Code</h3>
+                            <p>Wrap your OpenAI client with our tracker. That's it!</p>
+
+                            <div class="code-example" id="pythonExample">
+                                <pre><code>from openai import OpenAI
+from substacker import track_openai
+
+# Wrap your OpenAI client
+openai = track_openai(
+    OpenAI(),
+    api_key="<span id="keyInCode1">YOUR_API_KEY</span>",
+    team="engineering"  # Your team name
+)
+
+# Use OpenAI normally - tracking happens automatically
+response = openai.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "Hello!"}]
+)</code></pre>
+                                <button class="copy-btn" onclick="copyCodeExample('python')">
+                                    📋 Copy Full Example
+                                </button>
+                            </div>
+
+                            <div class="completion-actions">
+                                <button class="test-btn" onclick="checkSDKSetup()">
+                                    ✓ Verify Setup
+                                </button>
+                                <button class="next-btn" onclick="completeSDKSetup()">
+                                    Complete Setup →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Setup Complete -->
+                    <div class="wizard-step" id="step4" style="display: none;">
+                        <div class="step-indicator">
+                            <span class="step-number completed">✓</span>
+                            <span class="step-line"></span>
+                            <span class="step-number completed">✓</span>
+                            <span class="step-line"></span>
+                            <span class="step-number completed">✓</span>
+                        </div>
+
+                        <div class="step-content" style="text-align: center;">
+                            <div style="font-size: 4em; color: #10b981; margin-bottom: 20px;">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <h2 style="color: #1f2937; margin-bottom: 10px;">SDK Integration Complete!</h2>
+                            <p style="color: #6b7280; font-size: 1.1em; margin-bottom: 30px;">
+                                Your application is now tracking AI costs in real-time.
+                            </p>
+
+                            <div class="next-steps-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0; text-align: left;">
+                                <div class="next-step-card">
+                                    <div style="font-size: 2em; color: #3b82f6; margin-bottom: 10px;">
+                                        🚀
+                                    </div>
+                                    <h3 style="margin-bottom: 8px;">1. Deploy Your Code</h3>
+                                    <p style="color: #6b7280; font-size: 0.95em;">
+                                        Deploy your application with the SDK integration. Costs will be tracked automatically on every API call.
+                                    </p>
+                                </div>
+
+                                <div class="next-step-card">
+                                    <div style="font-size: 2em; color: #8b5cf6; margin-bottom: 10px;">
+                                        📊
+                                    </div>
+                                    <h3 style="margin-bottom: 8px;">2. Monitor in Real-Time</h3>
+                                    <p style="color: #6b7280; font-size: 0.95em;">
+                                        Visit your dashboard to see team costs, model usage, and anomaly alerts as they happen.
+                                    </p>
+                                </div>
+
+                                <div class="next-step-card">
+                                    <div style="font-size: 2em; color: #ec4899; margin-bottom: 10px;">
+                                        🔔
+                                    </div>
+                                    <h3 style="margin-bottom: 8px;">3. Set Up Alerts</h3>
+                                    <p style="color: #6b7280; font-size: 0.95em;">
+                                        Configure budget thresholds and get notified when teams exceed their allocated spend.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="completion-cta" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; color: white; margin: 30px 0;">
+                                <h3 style="color: white; margin-bottom: 15px;">Start Tracking Now</h3>
+                                <p style="opacity: 0.9; margin-bottom: 20px;">
+                                    Your API key is active. Make your first tracked API call and watch the data flow in.
+                                </p>
+                                <button onclick="goToDashboard()" style="background: white; color: #667eea; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1.05em;">
+                                    <i class="fas fa-tachometer-alt"></i> View Dashboard
+                                </button>
+                            </div>
+
+                            <div class="additional-resources" style="background: #f9fafb; padding: 25px; border-radius: 8px; margin-top: 20px; text-align: left;">
+                                <h4 style="margin-bottom: 15px; color: #1f2937;">
+                                    <i class="fas fa-book"></i> Additional Resources
+                                </h4>
+                                <ul style="list-style: none; padding: 0; margin: 0;">
+                                    <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                        <a href="/dev-docs" style="color: #3b82f6; text-decoration: none;">
+                                            <i class="fas fa-code"></i> API Documentation
+                                        </a>
+                                    </li>
+                                    <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                        <a href="/csv-guide" style="color: #3b82f6; text-decoration: none;">
+                                            <i class="fas fa-file-alt"></i> CSV Format Guide
+                                        </a>
+                                    </li>
+                                    <li style="padding: 8px 0;">
+                                        <a href="mailto:support@substacker.nayacloud.com" style="color: #3b82f6; text-decoration: none;">
+                                            <i class="fas fa-envelope"></i> Contact Support
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <button class="skip-btn" onclick="showMethodSelection()" style="margin-top: 20px;">
+                                <i class="fas fa-arrow-left"></i> Back to Analysis Options
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Interface (Hidden by default) -->
+                <div class="upload-interface" id="uploadInterface" style="display: none;">
+                    <button class="back-button" onclick="showMethodSelection()">
+                        <i class="fas fa-arrow-left"></i> Back to options
+                    </button>
+
+                    <h2 style="margin: 20px 0;">Upload Your Usage Data</h2>
+
+                    <!-- Format Requirements Box -->
+                    <div class="format-requirements">
+                    <div class="requirement-header">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Required Data Format</strong>
+                    </div>
+                    <div class="requirement-content">
+                        <p><strong>Your CSV must include these columns:</strong></p>
+                        <ul>
+                            <li><code>model</code> - e.g., gpt-4, gpt-3.5-turbo, claude-3-opus, gemini-pro</li>
+                            <li><code>prompt_tokens</code> - number of input tokens</li>
+                            <li><code>completion_tokens</code> - number of output tokens</li>
+                            <li><code>team</code> - <strong>OPTIONAL</strong> - we auto-generate if missing</li>
+                        </ul>
+                        
+                        <h4 style="margin-top: 20px; margin-bottom: 10px;">If you don't have a team column:</h4>
+                        <p style="color: #666; margin-bottom: 10px;">We can auto-generate teams from:</p>
+                        <ul style="margin-left: 40px;">
+                            <li><code>api_key</code> - Maps to Team-A, Team-B, etc.</li>
+                            <li><code>user_email</code> - Extracts from domain (john@marketing.com → Marketing)</li>
+                            <li><code>customer_id</code> - Creates Customer-123, Customer-456</li>
+                            <li><strong>Fallback:</strong> Groups all as "All Teams"</li>
+                        </ul>
+                        
+                        <p class="example-text" style="margin-top: 15px;">
+                            <strong>Example:</strong> 
+                            <code>model,prompt_tokens,completion_tokens,team</code><br>
+                            <code>gpt-4,100,50,Marketing</code><br>
+                            <code>claude-3-opus,150,75,Engineering</code>
+                        </p>
+                        <div class="template-download">
+                            <a href="/sample_data/template.csv" download class="download-link">
+                                <i class="fas fa-download"></i> Download CSV Template
+                            </a>
+                            <a href="/sample_data/example_with_teams.csv" download class="download-link">
+                                <i class="fas fa-file-csv"></i> Download Example File
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2>Drop your file here</h2>
+                    <p class="upload-text">or <span class="upload-link">click to browse</span></p>
+                    <p class="upload-formats">CSV or JSON format • Max 50MB</p>
+                    <input type="file" id="fileInput" accept=".csv,.json" hidden>
+                </div>
+
+                <p class="privacy-notice">
+                    <i class="fas fa-lock"></i> Your data is processed locally and securely. We never store your raw data.
+                </p>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state" style="display: none;">
+            <div class="container">
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <p>Analyzing your OpenAI usage...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section" style="display: none;">
+            <div class="container">
+                <!-- Results Header -->
+                <div class="results-header">
+                    <h2>💰 Your Teams' AI Spending Report</h2>
+                    <button id="newAnalysis" class="secondary-button">
+                        <i class="fas fa-plus"></i> New Analysis
+                    </button>
+                </div>
+
+                <!-- Team Attribution Section (MVP HERO FEATURE) -->
+                <div class="team-attribution-container">
+                    <h3>💰 Who's Spending What?</h3>
+                    <p class="team-subtitle">Your AI costs broken down by team. Finally, you know where the money goes.</p>
+                    <div class="team-breakdown-layout">
+                        <div class="team-chart">
+                            <canvas id="teamBreakdownChart"></canvas>
+                        </div>
+                        <div class="team-table">
+                            <table id="teamTable">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Monthly Cost</th>
+                                        <th>% of Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teamTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results with Preview Layout -->
+                <div class="results-with-preview">
+                    <!-- Summary Cards Section -->
+                    <div class="results-main">
+                        <div class="summary-grid">
+                            <div class="summary-card primary">
+                                <div class="card-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-label">Total Monthly Spend</span>
+                                    <span class="card-value" id="totalCost">$0</span>
+                                </div>
+                            </div>
+
+                            <div class="summary-card warning">
+                                <div class="card-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-label">Teams Tracked</span>
+                                    <span class="card-value" id="wasteAmount">0</span>
+                                </div>
+                            </div>
+
+                            <div class="summary-card success">
+                                <div class="card-icon">
+                                    <i class="fas fa-trending-down"></i>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-label">Optimization Potential</span>
+                                    <span class="card-value" id="savingsPercentage">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="summary-card info">
+                                <div class="card-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-label">Cost Visibility</span>
+                                    <span class="card-value" id="monthlySavings">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Preview Section -->
+                    <div class="preview-panel">
+                        <div class="preview-header">
+                            <i class="fas fa-file"></i>
+                            <h4>Data Preview</h4>
+                        </div>
+                        <div id="previewContent" class="preview-content">
+                            <p class="preview-placeholder">Upload data will appear here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Beta Launch CTA Section -->
+                <div class="beta-cta-section">
+                    <div class="beta-cta-card">
+                        <div class="beta-header">
+                            <i class="fas fa-rocket"></i>
+                            <h2>Join Beta Launch</h2>
+                        </div>
+                        
+                        <p class="beta-message">
+                            You just saw your team breakdown. <strong>Now make decisions based on data.</strong>
+                        </p>
+                        
+                        <div class="beta-stats">
+                            <div class="beta-stat">
+                                <strong id="betaTotalSavings">$0</strong>
+                                <span>Total Team Spend</span>
+                            </div>
+                            <div class="beta-stat">
+                                <strong id="betaSavingsPercent">0%</strong>
+                                <span>Teams Tracked</span>
+                            </div>
+                        </div>
+                        
+                        <p class="beta-subtext">
+                            What you can do now:<br>
+                            ✓ Share results with your VP Eng<br>
+                            ✓ Set team budgets based on data<br>
+                            ✓ Plan optimization efforts<br>
+                            ✓ Track team-level AI spending<br>
+                            ✓ Make data-driven decisions
+                        </p>
+                        
+                        <form id="betaEmailForm" class="beta-email-form">
+                            <input type="email" 
+                                   name="beta_email" 
+                                   placeholder="your@company.com" 
+                                   required>
+                            <button type="submit" class="cta-button primary-button">
+                                <span>Get Beta Access</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                        
+                        <p class="beta-promise">
+                            <i class="fas fa-check-circle"></i> 
+                            You'll be first in line when we launch. No spam, just results.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Collapsible Patterns (What This Means) -->
+                <div class="collapsible-section" id="optimizationSection">
+                    <div class="collapsible-header">
+                        <h3>📊 What This Breakdown Means</h3>
+                        <i class="fas fa-chevron-down collapsible-icon"></i>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="patterns-container">
+                            <h3>🔍 Cost Patterns Detected</h3>
+                            <div id="patternsList" class="patterns-grid"></div>
+                        </div>
+
+                        <div class="recommendations-container">
+                            <h3>💡 Next Steps</h3>
+                            <div id="recommendationsList" class="recommendations-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="next-steps-container" style="display: none;">
+                    <div class="next-steps-card">
+                        <div class="steps-header">
+                            <h3><i class="fas fa-check-circle"></i> Recommended Next Steps</h3>
+                        </div>
+                        <ol class="steps-list">
+                            <li>
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <strong>Implement Caching</strong>
+                                    <p>Cache frequent queries to eliminate duplicate API calls</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <strong>Optimize Model Selection</strong>
+                                    <p>Use faster, cheaper models for simple tasks</p>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <strong>Compress Prompts</strong>
+                                    <p>Reduce system prompt size and token usage</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- CTA Section -->
+                    <div class="cta-container">
+                        <h3>Need Help Implementing These Changes?</h3>
+                        <p>We can optimize your implementation and deploy the fixes in 24-48 hours.</p>
+                        <div class="cta-buttons">
+                            <button id="getHelp" class="cta-button primary-button">
+                                <i class="fas fa-headset"></i> Get Professional Help
+                            </button>
+                            <button id="shareResults" class="cta-button secondary-button">
+                                <i class="fas fa-share-alt"></i> Share Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share Options -->
+                <div class="export-section">
+                    <h4>Share Your Results</h4>
+                    <div class="export-buttons">
+                        <button id="shareResults" class="export-button">
+                            <i class="fas fa-share-alt"></i> Share Results
+                        </button>
+                        <button id="newAnalysis" class="export-button">
+                            <i class="fas fa-plus"></i> New Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <div class="container">
+                <div class="error-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Oops! Something went wrong</h3>
+                    <p id="errorMessage"></p>
+                    <button id="tryAgain" class="secondary-button">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <strong>Substacker</strong>
+                    <p>Team-level AI cost attribution and optimization.</p>
+                </div>
+                <div class="footer-section">
+                    <strong>Legal</strong>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Substacker | AI Cost Intelligence Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="/static/results.js"></script>
+    <script src="/static/analyzer.js"></script>
+</body>
+</html>

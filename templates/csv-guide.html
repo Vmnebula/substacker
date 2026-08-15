@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload Guide - Substacker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .navbar .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            text-decoration: none;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .navbar-menu a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .navbar-menu a:hover {
+            color: #1e3a5f;
+            background: #f3f4f6;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(30, 58, 95, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #1a1f2e;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #1e3a5f;
+            font-size: 1.3em;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        .required-columns {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .column-info {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-left: 4px solid #d4af37;
+            border-radius: 4px;
+        }
+
+        .column-info .name {
+            font-weight: bold;
+            color: #1e3a5f;
+            font-size: 1.1em;
+        }
+
+        .column-info .type {
+            color: #999;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .column-info .description {
+            color: #555;
+            margin-top: 5px;
+        }
+
+        .optional {
+            background-color: #e8f5e9;
+            border-left-color: #4a7c59;
+        }
+
+        .optional .name {
+            color: #4a7c59;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        table thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1f2e;
+        }
+
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .example-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .example-code .key {
+            color: #e06c75;
+        }
+
+        .example-code .value {
+            color: #98c379;
+        }
+
+        .example-code .number {
+            color: #d19a66;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 58, 95, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+            border-color: #999;
+        }
+
+        .tips-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tips-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .tips-box ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .tips-box li {
+            margin-bottom: 8px;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error-box h4 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+
+        .error-box ul {
+            margin-left: 20px;
+            color: #721c24;
+        }
+
+        .error-box li {
+            margin-bottom: 8px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .success-box p {
+            color: #155724;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .back-link {
+            color: #1e3a5f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            color: #d4af37;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            table th,
+            table td {
+                padding: 8px 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="navbar-brand">Substacker</a>
+            <div class="navbar-menu">
+                <a href="/">Home</a>
+                <a href="/analyzer">Analyzer</a>
+                <a href="/csv-guide">CSV Guide</a>
+                <a href="/" class="btn-back">← Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>📊 CSV Upload Guide</h1>
+            <p>Learn how to prepare your data for analysis</p>
+        </div>
+
+        <div class="content">
+            <!-- Required Columns Section -->
+            <section class="section">
+                <h2>📋 Required Columns</h2>
+                
+                <div class="required-columns">
+                    <div class="column-info">
+                        <div class="name">model</div>
+                        <div class="type">Text (required)</div>
+                        <div class="description">The AI model name (e.g., "gpt-4", "claude-3-opus", "gemini-pro")</div>
+                    </div>
+
+                    <div class="column-info">
+                        <div class="name">prompt_tokens</div>
+                        <div class="type">Number (required)</div>
+                        <div class="description">Number of input tokens used</div>
+                    </div>
+
+                    <div class="column-info">
+                        <div class="name">completion_tokens</div>
+                        <div class="type">Number (required)</div>
+                        <div class="description">Number of output tokens generated</div>
+                    </div>
+
+                    <div class="column-info optional">
+                        <div class="name">team</div>
+                        <div class="type">Text (optional)</div>
+                        <div class="description">Team or department name (if not provided, we auto-generate from API key, email, or customer ID)</div>
+                    </div>
+                </div>
+
+                <h3>Optional Columns for Auto-Team Mapping</h3>
+                <p style="color: #666; margin-bottom: 15px;">If you don't have a team column, we can auto-generate it from:</p>
+                
+                <div class="column-info optional">
+                    <div class="name">api_key</div>
+                    <div class="description">Maps unique API keys to teams (Team-A, Team-B, etc.)</div>
+                </div>
+
+                <div class="column-info optional">
+                    <div class="name">user_email</div>
+                    <div class="description">Extracts team from email domain (john@marketing.com → Marketing)</div>
+                </div>
+
+                <div class="column-info optional">
+                    <div class="name">customer_id</div>
+                    <div class="description">Creates team names from customer IDs (Customer-123, Customer-456)</div>
+                </div>
+            </section>
+
+            <!-- Supported Models Section -->
+            <section class="section">
+                <h2>🤖 Supported AI Models</h2>
+                
+                <h3>OpenAI</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>Type</th>
+                            <th>Input Price</th>
+                            <th>Output Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>gpt-4</td>
+                            <td>Advanced</td>
+                            <td>$0.03 / 1K tokens</td>
+                            <td>$0.06 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>gpt-4-turbo</td>
+                            <td>Fast Advanced</td>
+                            <td>$0.01 / 1K tokens</td>
+                            <td>$0.03 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>gpt-3.5-turbo</td>
+                            <td>Budget</td>
+                            <td>$0.0005 / 1K tokens</td>
+                            <td>$0.0015 / 1K tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">Anthropic (Claude)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>Type</th>
+                            <th>Input Price</th>
+                            <th>Output Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>claude-3-opus</td>
+                            <td>Advanced</td>
+                            <td>$0.015 / 1K tokens</td>
+                            <td>$0.075 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>claude-3-sonnet</td>
+                            <td>Balanced</td>
+                            <td>$0.003 / 1K tokens</td>
+                            <td>$0.015 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>claude-3-haiku</td>
+                            <td>Budget</td>
+                            <td>$0.00025 / 1K tokens</td>
+                            <td>$0.00125 / 1K tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">Google (Gemini)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>Type</th>
+                            <th>Input Price</th>
+                            <th>Output Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>gemini-1.5-pro</td>
+                            <td>Advanced</td>
+                            <td>$0.00125 / 1K tokens</td>
+                            <td>$0.00375 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>gemini-1.5-flash</td>
+                            <td>Budget</td>
+                            <td>$0.000075 / 1K tokens</td>
+                            <td>$0.0003 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>gemini-pro</td>
+                            <td>Standard</td>
+                            <td>$0.00025 / 1K tokens</td>
+                            <td>$0.0005 / 1K tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">Azure OpenAI</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model Name</th>
+                            <th>Equivalent</th>
+                            <th>Input Price</th>
+                            <th>Output Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>azure-gpt-4</td>
+                            <td>GPT-4</td>
+                            <td>$0.03 / 1K tokens</td>
+                            <td>$0.06 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>azure-gpt-4-turbo</td>
+                            <td>GPT-4 Turbo</td>
+                            <td>$0.01 / 1K tokens</td>
+                            <td>$0.03 / 1K tokens</td>
+                        </tr>
+                        <tr>
+                            <td>azure-gpt-35-turbo</td>
+                            <td>GPT-3.5 Turbo</td>
+                            <td>$0.0005 / 1K tokens</td>
+                            <td>$0.0015 / 1K tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Example CSV Section -->
+            <section class="section">
+                <h2>📝 Example CSV Format</h2>
+                
+                <h3>Minimal Format (with auto-team mapping)</h3>
+                <div class="example-code">model,prompt_tokens,completion_tokens,api_key
+gpt-4,150,250,sk_prod_123
+gpt-3.5-turbo,50,100,sk_prod_456
+claude-3-opus,200,300,sk_prod_123</div>
+
+                <h3>With Team Column</h3>
+                <div class="example-code">model,prompt_tokens,completion_tokens,team
+gpt-4,150,250,marketing
+gpt-3.5-turbo,50,100,engineering
+claude-3-opus,200,300,data_science</div>
+
+                <h3>From Email Domain</h3>
+                <div class="example-code">model,prompt_tokens,completion_tokens,user_email
+gpt-4,150,250,john@marketing.example.com
+gpt-3.5-turbo,50,100,jane@engineering.example.com
+gemini-pro,75,150,bob@datascience.example.com</div>
+            </section>
+
+            <!-- Tips Section -->
+            <section class="section">
+                <h2>💡 Tips for Best Results</h2>
+                <div class="tips-box">
+                    <h4>✓ Data Format Tips</h4>
+                    <ul>
+                        <li><strong>Token counts must be whole numbers</strong> (no decimals)</li>
+                        <li><strong>Model names are case-insensitive</strong> (GPT-4, gpt-4, Gpt-4 all work)</li>
+                        <li><strong>Model name variations are supported</strong> (gpt-4-0613 → gpt-4)</li>
+                        <li><strong>CSV encoding should be UTF-8</strong> for special characters</li>
+                        <li><strong>Maximum 100,000 rows</strong> per upload</li>
+                    </ul>
+                </div>
+
+                <div class="tips-box">
+                    <h4>📊 Data Quality Tips</h4>
+                    <ul>
+                        <li>Include at least 1 month of data for meaningful trends</li>
+                        <li>Include multiple teams if comparing cost allocation</li>
+                        <li>Include variety of models to see optimization opportunities</li>
+                        <li>Consistent team naming helps identify patterns</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Common Errors Section -->
+            <section class="section">
+                <h2>⚠️ Common Issues</h2>
+                <div class="error-box">
+                    <h4>❌ Error: Missing required columns</h4>
+                    <ul>
+                        <li>Check that you have: model, prompt_tokens, completion_tokens</li>
+                        <li>Column names are case-sensitive in error messages but flexible in matching</li>
+                        <li>Try: prompt_token, input_tokens instead of prompt_tokens</li>
+                    </ul>
+                </div>
+
+                <div class="error-box">
+                    <h4>❌ Error: File too large</h4>
+                    <ul>
+                        <li>Maximum file size is 10MB</li>
+                        <li>Split large datasets into multiple uploads</li>
+                        <li>Remove unnecessary columns</li>
+                    </ul>
+                </div>
+
+                <div class="error-box">
+                    <h4>❌ Error: Invalid token count</h4>
+                    <ul>
+                        <li>Token counts must be whole numbers (0, 150, 250, etc.)</li>
+                        <li>Remove decimals (150.5 → 150)</li>
+                        <li>Remove text like "tokens" or "k"</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Success: What happens next?</h4>
+                    <p>After upload, you'll see:</p>
+                    <ul style="margin-left: 20px; list-style: none;">
+                        <li>✓ Total cost breakdown by team</li>
+                        <li>✓ Cost by provider (OpenAI, Claude, Gemini, etc.)</li>
+                        <li>✓ Waste patterns detected</li>
+                        <li>✓ Cost-saving recommendations</li>
+                        <li>✓ Team attribution accuracy</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section class="section">
+                <h2>📥 Get Started</h2>
+                <p style="color: #666; margin-bottom: 20px;">Download a template CSV file to get started. You can edit it with your data and upload it.</p>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="downloadTemplate()">
+                        📥 Download CSV Template
+                    </button>
+                    <a href="/analyzer" class="btn btn-primary">
+                        📤 Go to Uploader
+                    </a>
+                    <a href="/" class="btn btn-secondary">
+                        ← Back to Home
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <div class="footer">
+            <p>Questions? <a href="mailto:support@substacker.nayacloud.com" class="back-link">Contact Support</a></p>
+            <p style="font-size: 0.9em; color: #999;">Max file: 10MB | Max rows: 100,000 | Supported formats: CSV, JSON</p>
+        </div>
+    </div>
+
+    <script>
+        function downloadTemplate() {
+            // Create CSV content
+            const csvContent = `model,prompt_tokens,completion_tokens,team
+gpt-4,150,250,marketing
+gpt-4,120,200,marketing
+gpt-3.5-turbo,50,100,engineering
+gpt-3.5-turbo,75,150,engineering
+claude-3-opus,200,300,data_science
+claude-3-sonnet,100,150,data_science
+gemini-pro,80,120,marketing
+azure-gpt-4-turbo,90,180,engineering`;
+
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'substacker-template.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

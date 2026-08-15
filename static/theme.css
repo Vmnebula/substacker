@@ -1,0 +1,284 @@
+/* ==========================================
+   THEME CUSTOMIZATION - Theme variables and overrides
+   ========================================== */
+
+:root {
+  /* Light Theme (Default) */
+  --theme-background: var(--color-light-bg);
+  --theme-surface: var(--color-light-surface);
+  --theme-text-primary: var(--color-dark-primary);
+  --theme-text-secondary: var(--color-light-secondary);
+  --theme-border: var(--color-border);
+  --theme-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --theme-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================
+   DARK MODE - Using prefers-color-scheme
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --theme-background: #0f172a;
+    --theme-surface: #1a202c;
+    --theme-text-primary: #f1f5f9;
+    --theme-text-secondary: #cbd5e0;
+    --theme-border: #334155;
+    --theme-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+    --theme-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48);
+  }
+}
+
+/* ==========================================
+   DARK MODE CLASS - Manual dark mode toggle
+   ========================================== */
+
+html[data-theme="dark"],
+body.dark-mode {
+  --theme-background: #0f172a;
+  --theme-surface: #1a202c;
+  --theme-text-primary: #f1f5f9;
+  --theme-text-secondary: #cbd5e0;
+  --theme-border: #334155;
+  --theme-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+  --theme-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.48);
+}
+
+html[data-theme="light"],
+body.light-mode {
+  --theme-background: var(--color-light-bg);
+  --theme-surface: var(--color-light-surface);
+  --theme-text-primary: var(--color-dark-primary);
+  --theme-text-secondary: var(--color-light-secondary);
+  --theme-border: var(--color-border);
+  --theme-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --theme-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================
+   THEME AWARE COMPONENTS
+   ========================================== */
+
+body {
+  background-color: var(--theme-background);
+  color: var(--theme-text-primary);
+  transition: background-color var(--transition-normal),
+              color var(--transition-normal);
+}
+
+/* Backgrounds */
+.bg-primary {
+  background-color: var(--theme-surface);
+  transition: background-color var(--transition-normal);
+}
+
+.bg-secondary {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+html[data-theme="dark"] .bg-secondary,
+body.dark-mode .bg-secondary {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Text Colors */
+.text-primary {
+  color: var(--theme-text-primary);
+}
+
+.text-secondary {
+  color: var(--theme-text-secondary);
+}
+
+/* Borders */
+.border,
+.border-top,
+.border-bottom,
+.border-left,
+.border-right {
+  border-color: var(--theme-border);
+}
+
+/* Shadows */
+.shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: var(--theme-shadow);
+}
+
+.shadow-lg {
+  box-shadow: var(--theme-shadow-lg);
+}
+
+/* ==========================================
+   THEME SPECIFIC COMPONENT OVERRIDES
+   ========================================== */
+
+/* Cards */
+.card {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--theme-shadow-lg);
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+  color: var(--theme-text-primary);
+  transition: all var(--transition-fast);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  background-color: var(--theme-surface);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Buttons */
+.btn {
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary {
+  background-color: var(--theme-surface);
+  color: var(--theme-text-primary);
+  border-color: var(--theme-border);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="dark"] .btn-secondary:hover,
+body.dark-mode .btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation */
+nav {
+  background-color: var(--theme-surface);
+  border-color: var(--theme-border);
+}
+
+/* ==========================================
+   ACCENT COLOR THEMES
+   ========================================== */
+
+/* Blue Accent */
+:root[data-accent="blue"] {
+  --color-accent: #3b82f6;
+  --color-accent-light: #dbeafe;
+  --color-accent-dark: #1e40af;
+}
+
+/* Purple Accent */
+:root[data-accent="purple"] {
+  --color-accent: #8b5cf6;
+  --color-accent-light: #ede9fe;
+  --color-accent-dark: #6d28d9;
+}
+
+/* Green Accent */
+:root[data-accent="green"] {
+  --color-accent: #10b981;
+  --color-accent-light: #d1fae5;
+  --color-accent-dark: #047857;
+}
+
+/* Red Accent */
+:root[data-accent="red"] {
+  --color-accent: #ef4444;
+  --color-accent-light: #fee2e2;
+  --color-accent-dark: #b91c1c;
+}
+
+/* ==========================================
+   THEME ANIMATIONS - Smooth transitions
+   ========================================== */
+
+/* Fade theme transition */
+.theme-transition {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ==========================================
+   PRINT STYLES - Force light theme
+   ========================================== */
+
+@media print {
+  :root {
+    --theme-background: white;
+    --theme-surface: white;
+    --theme-text-primary: #000;
+    --theme-text-secondary: #333;
+    --theme-border: #ddd;
+  }
+
+  body {
+    background-color: white;
+    color: #000;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY - High contrast mode
+   ========================================== */
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-accent: #0060ff;
+    --color-success: #008000;
+    --color-error: #ff0000;
+    --color-warning: #ff9900;
+  }
+
+  .text-secondary {
+    color: var(--theme-text-primary);
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================
+   REDUCED MOTION - Respect prefers-reduced-motion
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Disable transform animations */
+  .btn:hover {
+    transform: none !important;
+  }
+
+  .card:hover {
+    transform: none !important;
+  }
+
+  .transition-fast,
+  .transition-normal {
+    transition-duration: 0.01ms !important;
+  }
+}

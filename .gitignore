@@ -1,0 +1,48 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+leads.db
+leads_backup_.db
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+!.env.*.template
+*.pem
+*.key
+*.crt
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Builds & Distributions
+build/
+dist/
+*.egg-info/

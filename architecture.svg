@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <style>
+    .box { fill:#ffffff; stroke:#2b6cb0; stroke-width:2; rx:8; }
+    .title { font: bold 20px sans-serif; fill:#153e75; }
+    .label { font: 14px sans-serif; fill:#1a202c; }
+    .small { font: 12px sans-serif; fill:#4a5568; }
+    .arrow { stroke:#2b6cb0; stroke-width:2; marker-end:url(#arrowhead); }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2b6cb0" />
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Header -->
+  <text x="30" y="36" class="title">Substacker — High-Level Architecture</text>
+  <text x="30" y="58" class="small">A VM Nebula Product | Strategic diagram: shows components and data flow (non-sensitive)</text>
+
+  <!-- Client and SDK -->
+  <rect x="40" y="100" width="220" height="70" class="box"/>
+  <text x="150" y="140" text-anchor="middle" class="label">Client Apps</text>
+  <text x="150" y="158" text-anchor="middle" class="small">(Web, Mobile, Services)</text>
+
+  <rect x="300" y="100" width="260" height="70" class="box"/>
+  <text x="430" y="140" text-anchor="middle" class="label">Substacker SDK</text>
+  <text x="430" y="158" text-anchor="middle" class="small">Provider-native instrumentation</text>
+
+  <!-- Ingestion & Processing -->
+  <rect x="600" y="90" width="240" height="90" class="box"/>
+  <text x="720" y="130" text-anchor="middle" class="label">Ingestion API</text>
+  <text x="720" y="148" text-anchor="middle" class="small">High-throughput, async</text>
+
+  <rect x="600" y="210" width="240" height="90" class="box"/>
+  <text x="720" y="250" text-anchor="middle" class="label">Processing Layer</text>
+  <text x="720" y="268" text-anchor="middle" class="small">Normalization, Attribution, Enrichment</text>
+
+  <!-- Database -->
+  <rect x="300" y="240" width="260" height="70" class="box"/>
+  <text x="430" y="280" text-anchor="middle" class="label">PostgreSQL (Supabase)</text>
+  <text x="430" y="298" text-anchor="middle" class="small">Time-series and metadata</text>
+
+  <!-- Engines -->
+  <rect x="880" y="110" width="260" height="80" class="box"/>
+  <text x="1020" y="150" text-anchor="middle" class="label">Forecasting and ML</text>
+  <text x="1020" y="168" text-anchor="middle" class="small">Vertex AI (planned)</text>
+
+  <rect x="880" y="220" width="260" height="70" class="box"/>
+  <text x="1020" y="255" text-anchor="middle" class="label">Cost Attribution Engine</text>
+  <text x="1020" y="273" text-anchor="middle" class="small">Model and team-level attribution</text>
+
+  <rect x="880" y="320" width="260" height="70" class="box"/>
+  <text x="1020" y="355" text-anchor="middle" class="label">Governance Engine</text>
+  <text x="1020" y="373" text-anchor="middle" class="small">Alerts, Policies, Chargeback</text>
+
+  <!-- Dashboards -->
+  <rect x="300" y="360" width="260" height="80" class="box"/>
+  <text x="430" y="400" text-anchor="middle" class="label">Dashboards and Reporting</text>
+  <text x="430" y="418" text-anchor="middle" class="small">BigQuery, Looker, Exports</text>
+
+  <!-- Arrows: client -> sdk -> ingestion -->
+  <line x1="260" y1="135" x2="300" y2="135" class="arrow" />
+  <line x1="560" y1="135" x2="600" y2="135" class="arrow" />
+
+  <!-- SDK -> DB (ingest path) -->
+  <line x1="430" y1="170" x2="430" y2="240" class="arrow" />
+
+  <!-- Ingestion -> Processing -->
+  <line x1="720" y1="180" x2="720" y2="210" class="arrow" />
+
+  <!-- Processing -> DB -->
+  <line x1="720" y1="300" x2="560" y2="300" class="arrow" />
+
+  <!-- Processing -> Engines -->
+  <line x1="840" y1="255" x2="880" y2="255" class="arrow" />
+  <line x1="840" y1="285" x2="880" y2="285" class="arrow" />
+
+  <!-- Engines -> Dashboards -->
+  <line x1="880" y1="390" x2="560" y2="390" class="arrow" />
+
+  <!-- Notes box -->
+  <rect x="40" y="480" width="1100" height="160" fill="#f8fafc" stroke="#cbd5e1" rx="6"/>
+  <text x="60" y="506" class="label">Design notes:</text>
+  <text x="60" y="526" class="small">• Diagram is intentionally high-level: omits low-level secrets, exact model configs, and proprietary heuristics.</text>
+  <text x="60" y="544" class="small">• Suitable for fellowship submissions — communicates architecture and integration approach without exposing implementation details.</text>
+
+</svg>

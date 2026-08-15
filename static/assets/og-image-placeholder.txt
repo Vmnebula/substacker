@@ -1,0 +1,14 @@
+# Placeholder for og-image.jpg
+
+This should be a 1200x630 social sharing image with:
+- Title: "I found $30K waste in my OpenAI API bills"
+- Subtitle: "Free tool reveals hidden costs in your LLM usage"
+- Your branding/logo
+- Call to action
+
+Create this image and place it at static/assets/og-image.jpg
+
+You can use tools like:
+- Canva (free)
+- Figma
+- Or hire a designer on Fiverr

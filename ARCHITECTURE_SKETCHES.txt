@@ -1,0 +1,383 @@
+"""
+SUBSTACKER - AI COST INTELLIGENCE PLATFORM
+Architecture Sketches for Google Fellowship Application
+═══════════════════════════════════════════════════════════════
+
+1. HIGH-LEVEL SYSTEM ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT APPLICATIONS                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │
+│  │ Python   │  │   CSV    │  │   REST   │  │  Web Portal  │   │
+│  │   SDK    │  │  Upload  │  │   API    │  │  Dashboard   │   │
+│  └─────┬────┘  └─────┬────┘  └─────┬────┘  └──────┬───────┘   │
+└────────┼─────────────┼─────────────┼───────────────┼───────────┘
+         │             │             │               │
+         └─────────────┴─────────────┴───────────────┘
+                            │
+         ┌──────────────────▼──────────────────┐
+         │      INGESTION & VALIDATION          │
+         │  • Multi-provider normalization     │
+         │  • Schema validation                │
+         │  • Event streaming pipeline         │
+         └──────────────────┬──────────────────┘
+                            │
+         ┌──────────────────▼──────────────────┐
+         │      COST COMPUTATION ENGINE         │
+         │  • Provider-specific pricing        │
+         │  • Token-level calculations         │
+         │  • Currency normalization           │
+         └──────────────────┬──────────────────┘
+                            │
+         ┌──────────────────▼──────────────────┐
+         │    ATTRIBUTION & ENRICHMENT          │
+         │  • Team/department mapping          │
+         │  • Customer-level tagging           │
+         │  • Feature attribution              │
+         └──────────────────┬──────────────────┘
+                            │
+         ┌──────────────────▼──────────────────┐
+         │       INTELLIGENCE LAYER             │
+         │  • Pattern detection                │
+         │  • Waste identification             │
+         │  • Anomaly analysis                 │
+         └──────────────────┬──────────────────┘
+                            │
+    ┌────────────┬──────────▼──────────┬────────────┐
+    │            │                     │            │
+┌───▼────┐  ┌───▼────┐  ┌─────▼──────┐  ┌───▼─────┐
+│ BUDGET │  │FORECAST│  │  STORAGE   │  │ ALERTS  │
+│ENFORCE │  │ ENGINE │  │ & INDEXING │  │ SYSTEM  │
+└───┬────┘  └───┬────┘  └─────┬──────┘  └───┬─────┘
+    │           │             │              │
+    └───────────┴─────────────┴──────────────┘
+                      │
+         ┌────────────▼────────────┐
+         │  PRESENTATION LAYER      │
+         │  • Real-time dashboards │
+         │  • Finance reports      │
+         │  • API responses        │
+         └─────────────────────────┘
+
+
+2. DATA FLOW - EVENT PROCESSING PIPELINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[API Request Event]
+        │
+        ├─→ SDK Tracker captures metadata
+        │   - timestamp
+        │   - model
+        │   - tokens (input/output)
+        │   - team_id / customer_id
+        │
+        ├─→ Event transmitted to platform
+        │   - Async, non-blocking
+        │   - Batched for efficiency
+        │
+        ├─→ Validation & Normalization
+        │   - Schema check
+        │   - Provider mapping
+        │   - Data cleansing
+        │
+        ├─→ Cost Computation
+        │   - Apply provider pricing
+        │   - Calculate total cost
+        │   - Convert currency
+        │
+        ├─→ Attribution
+        │   - Map to team/customer
+        │   - Enrich with metadata
+        │   - Tag by feature/project
+        │
+        ├─→ Intelligence Analysis
+        │   - Check for patterns
+        │   - Detect anomalies
+        │   - Identify waste
+        │
+        ├─→ Governance Check
+        │   - Compare to budgets
+        │   - Trigger alerts if needed
+        │   - Apply enforcement rules
+        │
+        ├─→ Storage
+        │   - Time-series database
+        │   - Aggregation tables
+        │   - Audit logs
+        │
+        └─→ Real-Time Update
+            - WebSocket broadcast
+            - Dashboard refresh
+            - Metrics update
+
+
+3. MULTI-PROVIDER INTEGRATION ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│   OpenAI    │  │  Anthropic  │  │   Google    │  │   Azure     │
+│   GPT-4/3.5 │  │   Claude    │  │   Gemini    │  │   OpenAI    │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │                │
+       └────────────────┴────────────────┴────────────────┘
+                             │
+              ┌──────────────▼──────────────┐
+              │   PROVIDER ABSTRACTION       │
+              │   • Unified cost model       │
+              │   • Normalized metrics       │
+              │   • Schema mapping           │
+              └──────────────┬──────────────┘
+                             │
+              ┌──────────────▼──────────────┐
+              │    COST INTELLIGENCE         │
+              │    • Cross-provider compare  │
+              │    • Routing optimization    │
+              │    • Efficiency scoring      │
+              └──────────────┬──────────────┘
+                             │
+              ┌──────────────▼──────────────┐
+              │     UNIFIED ANALYTICS        │
+              │     • Single dashboard       │
+              │     • Consolidated reports   │
+              │     • Holistic insights      │
+              └─────────────────────────────┘
+
+
+4. ATTRIBUTION ENGINE - HIERARCHY MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+                    [Organization]
+                          │
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+   [Department]      [Department]      [Department]
+   Engineering        Marketing         Product
+        │                 │                 │
+   ┌────┼────┐       ┌────┼────┐       ┌────┼────┐
+   │    │    │       │    │    │       │    │    │
+[Team] [Team]    [Team] [Team]     [Team] [Team]
+Backend Frontend  Growth Content   Mobile  Design
+   │                     │                   │
+   │                     │                   │
+[Project/Feature]  [Campaign]          [Feature]
+   │                     │                   │
+   │                     │                   │
+[Customer/Request]  [Customer]         [Customer]
+
+Attribution Rules:
+• API Key → Team (automatic)
+• Request Tag → Customer (manual)
+• Metadata → Project (optional)
+• Hierarchical rollup (bottom-up aggregation)
+
+
+5. GOVERNANCE & ENFORCEMENT WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Incoming API Request]
+        │
+        ├─→ Calculate cost in real-time
+        │
+        ├─→ Check against budgets
+        │   │
+        │   ├─→ [Under 50% budget] → ✓ Allow
+        │   │
+        │   ├─→ [50-75% budget] → ⚠️  Alert (info)
+        │   │
+        │   ├─→ [75-90% budget] → ⚠️⚠️ Alert (warning)
+        │   │
+        │   ├─→ [90-100% budget] → 🚨 Alert (critical)
+        │   │
+        │   └─→ [Over 100%] → 🛑 Block/Throttle
+        │                        (based on policy)
+        │
+        ├─→ Log decision & action
+        │
+        └─→ Trigger notifications
+            - Email to finance team
+            - Slack alert to admins
+            - Dashboard notification
+            - API response code
+
+
+6. FORECASTING & PREDICTION MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Historical Data]
+   - Daily spend (90 days)
+   - Hourly patterns
+   - Team usage trends
+   - Model distribution
+        │
+        ├─→ Statistical Analysis
+        │   - Moving averages
+        │   - Seasonal patterns
+        │   - Growth rate
+        │
+        ├─→ Current Trajectory
+        │   - This month's burn rate
+        │   - Acceleration/deceleration
+        │   - Anomaly adjustments
+        │
+        ├─→ [FUTURE: ML Model on Vertex AI]
+        │   - Time series forecasting
+        │   - Feature engineering
+        │   - Model training & validation
+        │
+        └─→ Projected Spend
+            - End of month forecast
+            - Confidence intervals
+            - Risk scenarios (best/worst case)
+
+
+7. WASTE DETECTION PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pattern 1: MODEL MISMATCH
+┌─────────────────────────────────────────┐
+│ Simple Task + Expensive Model = WASTE   │
+│                                         │
+│ Task: "Classify sentiment: positive?"   │
+│ Model Used: GPT-4 ($$$)                 │
+│ Recommended: GPT-3.5-Turbo ($)          │
+│ Savings: 95%                            │
+└─────────────────────────────────────────┘
+
+Pattern 2: DUPLICATE REQUESTS
+┌─────────────────────────────────────────┐
+│ Same Prompt Hash = DUPLICATE            │
+│                                         │
+│ Prompt: "Summarize quarterly report"    │
+│ Occurrences: 47 times in 1 hour        │
+│ Recommendation: Implement caching       │
+│ Savings: 98%                            │
+└─────────────────────────────────────────┘
+
+Pattern 3: UNUSED OUTPUT
+┌─────────────────────────────────────────┐
+│ Large Completion + No Usage = WASTE     │
+│                                         │
+│ Requested: 2000 tokens                  │
+│ Actually Used: 150 tokens               │
+│ Wasted: 1850 tokens (92.5%)            │
+│ Recommendation: Reduce max_tokens       │
+└─────────────────────────────────────────┘
+
+
+8. GOOGLE CLOUD INTEGRATION ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌────────────────────────────────────────────────────────────┐
+│                    SUBSTACKER PLATFORM                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │Ingestion │  │Analytics │  │Governance│  │Reporting │  │
+│  └─────┬────┘  └─────┬────┘  └─────┬────┘  └─────┬────┘  │
+└────────┼─────────────┼─────────────┼─────────────┼────────┘
+         │             │             │             │
+┌────────┼─────────────┼─────────────┼─────────────┼────────┐
+│        │      GOOGLE CLOUD SERVICES               │        │
+│  ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐ ┌────▼─────┐ │
+│  │  Pub/Sub  │ │ Vertex AI │ │  Secret   │ │ BigQuery │ │
+│  │ (Events)  │ │(Forecast) │ │  Manager  │ │(Analytics│ │
+│  └───────────┘ └───────────┘ └───────────┘ └──────────┘ │
+│                                                            │
+│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌──────────┐ │
+│  │Cloud Run  │ │Cloud SQL  │ │Cloud      │ │ Looker   │ │
+│  │(Compute)  │ │(Database) │ │Monitoring │ │(BI/Viz)  │ │
+│  └───────────┘ └───────────┘ └───────────┘ └──────────┘ │
+└────────────────────────────────────────────────────────────┘
+
+Phase 1: Cloud SQL + Secret Manager + Monitoring
+Phase 2: Vertex AI + BigQuery + Pub/Sub
+Phase 3: Cloud Run + Looker + Advanced Security
+Phase 4: Global deployment + Multi-region
+
+
+9. SECURITY & PRIVACY ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Client Application]
+        │
+        ├─→ TLS 1.3 Encryption
+        │
+┌───────▼────────┐
+│  API Gateway   │
+│  • Rate limit  │
+│  • JWT auth    │
+│  • CSRF token  │
+└───────┬────────┘
+        │
+┌───────▼────────┐
+│  Data Layer    │
+│  • AES-256     │
+│  • Row-level   │
+│  • Audit logs  │
+└───────┬────────┘
+        │
+   [Storage]
+   • NO prompt content
+   • ONLY metadata
+   • Cost signals
+   • Team/customer tags
+
+Privacy Principles:
+✓ Zero prompt storage
+✓ Metadata only (model, tokens, cost)
+✓ Encrypted at rest & in transit
+✓ Regional data isolation (EU/US/APAC)
+✓ Audit trail immutability
+✓ GDPR/SOC2 compliant design
+
+
+10. DEPLOYMENT & SCALING STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Current State (Railway):
+┌─────────────────────────────────────┐
+│  Railway.app (Auto-deploy)          │
+│  • FastAPI backend                  │
+│  • Gunicorn workers                 │
+│  • PostgreSQL (Supabase)            │
+│  • Auto-scaling (basic)             │
+└─────────────────────────────────────┘
+
+Future State (Google Cloud):
+┌─────────────────────────────────────┐
+│  Global Load Balancer               │
+└─────────┬───────────────────────────┘
+          │
+    ┌─────┴─────┐
+    │           │
+┌───▼────┐  ┌──▼─────┐  ┌───────────┐
+│US-West │  │US-East │  │EU-Central │
+│Cloud   │  │Cloud   │  │Cloud Run  │
+│Run     │  │Run     │  └───────────┘
+└────────┘  └────────┘
+    │           │           │
+    └─────┬─────┴───────────┘
+          │
+┌─────────▼────────────────────────┐
+│  Cloud SQL (Multi-region)        │
+│  • Read replicas                 │
+│  • Auto-failover                 │
+│  • Point-in-time recovery        │
+└──────────────────────────────────┘
+
+Performance Targets:
+• <100ms p99 latency
+• 99.9% uptime
+• 10K requests/sec capacity
+• Auto-scale 0→100 instances
+
+
+════════════════════════════════════════════════════════════════
+END OF ARCHITECTURE SKETCHES
+════════════════════════════════════════════════════════════════
+
+Note: These diagrams provide conceptual overview only. Specific 
+implementation details, algorithms, and data schemas are proprietary
+and omitted to protect intellectual property.
+
+For Google Fellowship Application - VMNebula, 2025
+"""

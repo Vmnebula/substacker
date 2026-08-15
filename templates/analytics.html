@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Substacker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/admin.css">
+{% endblock %}
+
+{% block content %}
+
+    <!-- Navigation Bar -->
+    <nav class="admin-navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics Dashboard</span>
+            </div>
+            <div class="navbar-menu">
+                <span class="admin-email" id="adminEmail">Analytics</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" data-section="overview">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="menu-item" data-section="costs">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Cost Analysis</span>
+                </a>
+                <a href="#" class="menu-item" data-section="providers">
+                    <i class="fas fa-cloud"></i>
+                    <span>Providers</span>
+                </a>
+                <a href="#" class="menu-item" data-section="models">
+                    <i class="fas fa-cube"></i>
+                    <span>Models</span>
+                </a>
+                <a href="#" class="menu-item" data-section="anomalies">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Anomalies</span>
+                </a>
+                <a href="#" class="menu-item" data-section="export">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+
+            <!-- ===== OVERVIEW SECTION ===== -->
+            <section id="overview" class="admin-section active">
+                <div class="analytics-header">
+                    <h1>Analytics Overview</h1>
+                    <p class="section-subtitle">Comprehensive cost and usage analytics across all teams</p>
+                </div>
+
+                <!-- Advanced Filters -->
+                <div class="analytics-filters">
+                    <div>
+                        <label class="filter-label">Date Range</label>
+                        <input type="text" id="dateRangeInput" class="filter-input" placeholder="Select date range">
+                    </div>
+                    <div>
+                        <label class="filter-label">Team</label>
+                        <select id="teamFilterAnalytics" class="filter-input">
+                            <option value="">All Teams</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="filter-label">Provider</label>
+                        <select id="providerFilter" class="filter-input">
+                            <option value="">All Providers</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="anthropic">Anthropic</option>
+                            <option value="google">Google</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="filter-label">Model</label>
+                        <select id="modelFilter" class="filter-input">
+                            <option value="">All Models</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: flex-end;">
+                        <button id="applyFiltersBtn" class="action-button primary" style="flex: 1;">
+                            <i class="fas fa-filter"></i> Apply
+                        </button>
+                        <button id="resetFiltersBtn" class="action-button secondary" style="flex: 1;">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Cost</div>
+                        <div class="metric-value" id="totalCostMetric">$0.00</div>
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-top: 8px;">
+                            <span id="costTrend">↑ 12.5% vs last period</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Requests</div>
+                        <div class="metric-value" id="totalRequests">0</div>
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-top: 8px;">
+                            <span id="requestTrend">0 requests/day avg</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Avg Cost/Request</div>
+                        <div class="metric-value" id="avgCostPerRequest">$0.00</div>
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-top: 8px;">
+                            <span id="costPerReqTrend">Most expensive model</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Top Provider</div>
+                        <div class="metric-value" id="topProvider">-</div>
+                        <div style="font-size: 0.85rem; color: #6b7280; margin-top: 8px;">
+                            <span id="topProviderCost">0% of total</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>30-Day Cost Trend</h3>
+                        </div>
+                        <canvas id="costTrendAnalytics" height="300"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Provider Cost Breakdown</h3>
+                        </div>
+                        <canvas id="providerBreakdown" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Model Comparison</h3>
+                        </div>
+                        <canvas id="modelComparison" height="300"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Team Performance</h3>
+                        </div>
+                        <canvas id="teamPerformance" height="300"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== COSTS SECTION ===== -->
+            <section id="costs" class="admin-section">
+                <div class="section-header">
+                    <h1>Detailed Cost Analysis</h1>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Team</th>
+                                <th>Provider</th>
+                                <th>Model</th>
+                                <th>Requests</th>
+                                <th>Cost</th>
+                                <th>Avg Cost/Req</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">Loading cost data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== PROVIDERS SECTION ===== -->
+            <section id="providers" class="admin-section">
+                <div class="section-header">
+                    <h1>Provider Analytics</h1>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Providers</div>
+                        <div class="metric-value" id="totalProviders">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Most Used</div>
+                        <div class="metric-value" id="mostUsedProvider">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Most Expensive</div>
+                        <div class="metric-value" id="mostExpensiveProvider">-</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Provider</th>
+                                <th>Total Cost</th>
+                                <th>Requests</th>
+                                <th>Avg Cost/Req</th>
+                                <th>% of Total</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providersTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading provider data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== MODELS SECTION ===== -->
+            <section id="models" class="admin-section">
+                <div class="section-header">
+                    <h1>Model Comparison</h1>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Models</div>
+                        <div class="metric-value" id="totalModels">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Most Used</div>
+                        <div class="metric-value" id="mostUsedModel">-</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Most Expensive</div>
+                        <div class="metric-value" id="mostExpensiveModel">-</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Provider</th>
+                                <th>Total Cost</th>
+                                <th>Requests</th>
+                                <th>Avg Cost/Req</th>
+                                <th>% of Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modelsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading model data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== ANOMALIES SECTION ===== -->
+            <section id="anomalies" class="admin-section">
+                <div class="section-header">
+                    <h1>Anomaly Detection & Alerts</h1>
+                    <button id="acknowledgeAnomaliesBtn" class="action-button secondary">
+                        <i class="fas fa-check"></i> Acknowledge All
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 15px;">Detected Anomalies</h3>
+                    <div id="anomaliesContainer">
+                        <div class="text-center" style="padding: 40px;">
+                            Loading anomaly data...
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 15px;">Anomaly Statistics</h3>
+                    <div class="chart-container">
+                        <canvas id="anomaliesChart" height="300"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== EXPORT SECTION ===== -->
+            <section id="export" class="admin-section">
+                <div class="section-header">
+                    <h1>Data Export</h1>
+                    <p class="section-subtitle">Export analytics data in multiple formats</p>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Export Options</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label>Format</label>
+                                <select id="exportFormat" class="form-input">
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date Range</label>
+                                <input type="text" id="exportDateRange" class="form-input" placeholder="Select range">
+                            </div>
+                            <div class="form-group">
+                                <label>Include</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 400;">
+                                        <input type="checkbox" id="exportCosts" checked> Cost Data
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 400;">
+                                        <input type="checkbox" id="exportUsage" checked> Usage Data
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 400;">
+                                        <input type="checkbox" id="exportAnomalies"> Anomalies
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 400;">
+                                        <input type="checkbox" id="exportRecommendations"> Recommendations
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Scheduled Exports</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="label-with-toggle">
+                                    <span>Enable Scheduled Exports</span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="enableScheduledExport">
+                                        <label for="enableScheduledExport"></label>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Frequency</label>
+                                <select id="exportFrequency" class="form-input" disabled>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Recipients</label>
+                                <input type="email" id="exportEmail" class="form-input" placeholder="email@example.com" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button id="exportNowBtn" class="action-button primary">
+                        <i class="fas fa-download"></i> Export Now
+                    </button>
+                    <button id="saveScheduleBtn" class="action-button secondary">
+                        <i class="fas fa-save"></i> Save Schedule
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="/static/js/export.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/analytics.js"></script>
+{% endblock %}

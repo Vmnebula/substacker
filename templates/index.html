@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Waste Analyzer - Find Hidden Costs in Your API Usage</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 OpenAI Waste Analyzer</h1>
+            <p class="tagline">Find out how much money you're burning on inefficient API usage</p>
+        </header>
+
+        <div class="stats-banner">
+            <div class="stat">
+                <span class="stat-value">\$2.3M</span>
+                <span class="stat-label">Total Waste Found</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">47%</span>
+                <span class="stat-label">Average Waste</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">3 min</span>
+                <span class="stat-label">To Save Money</span>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <svg class="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="upload-text">Drop your OpenAI usage CSV/JSON here</p>
+                <p class="upload-subtext">or click to browse</p>
+                <input type="file" id="fileInput" accept=".csv,.json" hidden>
+            </div>
+
+            <button id="tryDemo" class="demo-button">
+                Try with Sample Data
+            </button>
+        </div>
+
+        <div id="results" class="results-section" style="display: none;">
+            <h2>💸 Your Waste Report</h2>
+            
+            <div class="summary-cards">
+                <div class="summary-card red">
+                    <h3>Total Waste Found</h3>
+                    <p class="amount" id="wasteAmount">\$0</p>
+                    <p class="percentage" id="wastePercentage">0%</p>
+                </div>
+                
+                <div class="summary-card green">
+                    <h3>Potential Monthly Savings</h3>
+                    <p class="amount" id="monthlySavings">\$0</p>
+                </div>
+            </div>
+
+            <div class="patterns-section">
+                <h3>🎯 Waste Patterns Detected</h3>
+                <div id="patternsList"></div>
+            </div>
+
+            <div class="recommendations-section">
+                <h3>✅ Action Plan</h3>
+                <div id="recommendationsList"></div>
+            </div>
+
+            <div class="cta-section">
+                <h3>Ready to Stop Burning Money?</h3>
+                <p>We can implement these optimizations for you in 24 hours.</p>
+                <button id="getHelp" class="cta-button">
+                    Get Help Reducing Costs →
+                </button>
+            </div>
+
+            <div class="share-section">
+                <button id="shareResults" class="share-button">
+                    Share Your Results 🐦
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/results.js"></script>
+</body>
+</html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Waste Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>OpenAI Waste Analyzer</h1>
+      <form id="uploadForm">
+        <label for="csvfile">Upload CSV (item,quantity,unit_cost)</label>
+        <input type="file" id="csvfile" name="file" accept=".csv" />
+        <button type="submit">Analyze</button>
+      </form>
+
+      <section id="results" aria-live="polite"></section>
+    </main>
+    <script src="/static/results.js"></script>
+  </body>
+  </html>
