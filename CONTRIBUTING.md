@@ -64,4 +64,4 @@ black .
 
 ## 📄 Licensing
 
-By contributing to Substacker, you agree that your contributions will be licensed under the **GNU General Public License v3.0 (GPLv3)**.
+By contributing to Substacker, you agree that your contributions will be licensed under the **MIT License**.
