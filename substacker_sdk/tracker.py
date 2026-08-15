@@ -12,7 +12,7 @@ import tiktoken
 class SubstackerTracker:
     """Wrapper for OpenAI client that tracks usage"""
     
-    def __init__(self, openai_client, api_key: str, team: str, endpoint: str = "https://substacker.nayacloud.com/api/track"):
+    def __init__(self, openai_client, api_key: str, team: str, endpoint: str = "http://localhost:8000/api/track"):
         """
         Initialize tracker
         
@@ -137,7 +137,7 @@ class ChatProxy:
         return getattr(self._original, name)
 
 
-def track_openai(openai_client, api_key: str, team: str, endpoint: str = "https://substacker.nayacloud.com/api/track"):
+def track_openai(openai_client, api_key: str, team: str, endpoint: str = "http://localhost:8000/api/track"):
     """
     Wrap OpenAI client to track API usage in real-time
     

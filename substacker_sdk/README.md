@@ -17,7 +17,7 @@ from substacker import track_openai
 # Wrap your OpenAI client
 openai = track_openai(
     OpenAI(),
-    api_key="sk_substacker_xxx",  # Get from substacker.nayacloud.com
+    api_key="sk_substacker_xxx",  # Get from localhost:8000
     team="engineering"             # Your team name
 )
 
@@ -48,7 +48,7 @@ response = openai.chat.completions.create(
 
 ## Get Your API Key
 
-1. Sign up at [substacker.nayacloud.com](https://substacker.nayacloud.com)
+1. Sign up at [localhost:8000](http://localhost:8000)
 2. Go to Settings → API Keys
 3. Copy your `sk_substacker_xxx` key
 4. Use it in the `track_openai()` call
@@ -98,9 +98,9 @@ client_b = track_openai(OpenAI(), api_key="sk_xxx", team="project-b")
 
 ## Support
 
-- Documentation: [docs.substacker.nayacloud.com](https://docs.substacker.nayacloud.com)
-- Issues: [github.com/substacker/sdk/issues](https://github.com/substacker/sdk/issues)
-- Email: hello@substacker.nayacloud.com
+- Documentation: [docs.localhost:8000](https://docs.localhost:8000)
+- Issues: [github.com/substacker/sdk/issues](https://github.com/Vmnebula/substacker/issues)
+- Email: contact@vmnebula.com
 
 ## License
 

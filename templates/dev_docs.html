@@ -237,10 +237,10 @@
 
                 <h3>Quick Links</h3>
                 <ul style="margin-left: 20px;">
-                    <li><strong>Production URL:</strong> https://substacker.nayacloud.com</li>
-                    <li><strong>Admin Dashboard:</strong> https://substacker.nayacloud.com/admin/dashboard</li>
-                    <li><strong>SDK Keys:</strong> https://substacker.nayacloud.com/admin/sdk-keys</li>
-                    <li><strong>Health Check:</strong> https://substacker.nayacloud.com/health</li>
+                    <li><strong>Production URL:</strong> http://localhost:8000</li>
+                    <li><strong>Admin Dashboard:</strong> http://localhost:8000/admin/dashboard</li>
+                    <li><strong>SDK Keys:</strong> http://localhost:8000/admin/sdk-keys</li>
+                    <li><strong>Health Check:</strong> http://localhost:8000/health</li>
                 </ul>
             </div>
 
@@ -263,7 +263,7 @@ openai = track_openai(
     openai_client,
     api_key="sk_substacker_xxxx",  # Get from admin dashboard → SDK Keys
     team="engineering"
-    # endpoint defaults to https://substacker.nayacloud.com/api/track
+    # endpoint defaults to http://localhost:8000/api/track
 )
 
 # Use OpenAI normally - tracking happens automatically
@@ -285,7 +285,7 @@ openai = track_openai(
     OpenAI(api_key="sk-..."),
     api_key="sk_substacker_xxxx",
     team="data-science",
-    endpoint="https://substacker.nayacloud.com/api/track"  # Override if needed
+    endpoint="http://localhost:8000/api/track"  # Override if needed
 )</code></pre>
 
                 <div class="note">
@@ -299,7 +299,7 @@ openai = track_openai(
 
                 <h3>Authentication</h3>
                 <p>All API requests require the <code>X-API-Key</code> header:</p>
-                <pre><code class="language-bash">curl https://substacker.nayacloud.com/api/track \
+                <pre><code class="language-bash">curl http://localhost:8000/api/track \
   -H "X-API-Key: sk_substacker_xxxx" \
   -H "Content-Type: application/json" \
   -d '{...}'</code></pre>
@@ -358,7 +358,7 @@ openai = track_openai(
                 </table>
 
                 <h4>Example Request</h4>
-                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/track \
+                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/track \
   -H "X-API-Key: sk_substacker_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -394,7 +394,7 @@ openai = track_openai(
                 <p>Fetch real-time team cost breakdown and recent usage.</p>
 
                 <h4>Example Request</h4>
-                <pre><code class="language-bash">curl -X GET https://substacker.nayacloud.com/api/dashboard/realtime \
+                <pre><code class="language-bash">curl -X GET http://localhost:8000/api/dashboard/realtime \
   -H "X-API-Key: sk_substacker_abc123..."</code></pre>
 
                 <h4>Example Response</h4>
@@ -433,7 +433,7 @@ openai = track_openai(
                 </div>
 
                 <h4>Request</h4>
-                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/generate-key \
+                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/generate-key \
   -H "Cookie: admin_token=..." \
   -d "email=user@example.com"</code></pre>
 
@@ -454,7 +454,7 @@ openai = track_openai(
                 </div>
 
                 <h4>Request</h4>
-                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/revoke-key \
+                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/revoke-key \
   -H "Cookie: admin_token=..." \
   -d "key_prefix=sk_substacker_abc"</code></pre>
 
@@ -525,7 +525,7 @@ for i in range(10):
                 <pre><code class="language-python">import requests
 
 api_key = "sk_substacker_..."
-endpoint = "https://substacker.nayacloud.com/api/track"
+endpoint = "http://localhost:8000/api/track"
 
 payload = {
     "team": "engineering",
@@ -547,7 +547,7 @@ print(response.json())</code></pre>
                 <pre><code class="language-javascript">const axios = require('axios');
 
 const apiKey = 'sk_substacker_...';
-const endpoint = 'https://substacker.nayacloud.com/api/track';
+const endpoint = 'http://localhost:8000/api/track';
 
 const payload = {
   team: 'engineering',
@@ -566,7 +566,7 @@ axios.post(endpoint, payload, {
 });</code></pre>
 
                 <h3>cURL</h3>
-                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/track \
+                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/track \
   -H "X-API-Key: sk_substractor_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -609,13 +609,13 @@ axios.post(endpoint, payload, {
                 <h2><i class="fas fa-headset"></i> Support</h2>
 
                 <div class="success">
-                    <strong><i class="fas fa-envelope"></i> Email:</strong> support@substacker.nayacloud.com
+                    <strong><i class="fas fa-envelope"></i> Email:</strong> support@vmnebula.com
                 </div>
                 <div class="success">
                     <strong><i class="fas fa-bug"></i> Report Issues:</strong> GitHub Issues
                 </div>
                 <div class="success">
-                    <strong><i class="fas fa-chart-line"></i> Status:</strong> <a href="https://substacker.nayacloud.com/health">Health Check</a>
+                    <strong><i class="fas fa-chart-line"></i> Status:</strong> <a href="http://localhost:8000/health">Health Check</a>
                 </div>
             </div>
         </div>
