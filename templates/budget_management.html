@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Management - Substacker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/landing.css">
+    <style>
+        .budget-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .budget-header h1 {
+            color: #333;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-create-budget {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn-create-budget:hover {
+            transform: translateY(-2px);
+        }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .budget-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .budget-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .budget-type {
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+            text-transform: capitalize;
+        }
+
+        .budget-menu {
+            cursor: pointer;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .budget-card h3 {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+
+        .budget-team {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+
+        .budget-amount {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .budget-amount-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .budget-amount-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .budget-progress {
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .budget-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .budget-status.healthy {
+            background: #d1f2d1;
+            color: #1a5a1a;
+        }
+
+        .budget-status.warning {
+            background: #ffeaa7;
+            color: #7f5f1f;
+        }
+
+        .budget-status.critical {
+            background: #fab1a0;
+            color: #7f2c1f;
+        }
+
+        .budget-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 8px 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #999;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .forecast-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .forecast-section h3 {
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .forecast-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .forecast-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .budget-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .budget-header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-chart-pie"></i>
+                <span>Substacker</span>
+            </div>
+            <div class="navbar-menu">
+                <a href="/user/dashboard">← Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="budget-container">
+        <!-- Header -->
+        <div class="budget-header">
+            <h1>
+                <i class="fas fa-wallet"></i>
+                Budget Management
+            </h1>
+            <button class="btn-create-budget" onclick="openCreateBudgetModal()">
+                <i class="fas fa-plus"></i> New Budget
+            </button>
+        </div>
+
+        <!-- Budget Cards Grid -->
+        <div class="budget-grid" id="budgetGrid">
+            <!-- Budgets will be loaded here -->
+        </div>
+
+        <!-- Forecast Section -->
+        <div class="forecast-section">
+            <h3><i class="fas fa-chart-line"></i> Cost Forecast</h3>
+            <div class="forecast-item">
+                <span>Projected Month-End Cost</span>
+                <strong id="forecastCost">$950.00</strong>
+            </div>
+            <div class="forecast-item">
+                <span>Monthly Budget</span>
+                <strong id="monthlyBudget">$1,000.00</strong>
+            </div>
+            <div class="forecast-item">
+                <span>Remaining Budget</span>
+                <strong id="remainingBudget" style="color: #10b981;">+$50.00</strong>
+            </div>
+            <div class="forecast-item">
+                <span>Trend</span>
+                <strong id="trendStatus" style="color: #667eea;">Healthy</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Budget Modal -->
+    <div class="modal" id="createBudgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Budget</h2>
+                <button class="close-btn" onclick="closeCreateBudgetModal()">×</button>
+            </div>
+
+            <form id="createBudgetForm" onsubmit="submitBudget(event)">
+                <div class="form-group">
+                    <label for="budgetType">Budget Type *</label>
+                    <select id="budgetType" required onchange="updateTeamFieldVisibility()">
+                        <option value="">Select budget type</option>
+                        <option value="monthly">Monthly Budget</option>
+                        <option value="daily">Daily Budget</option>
+                        <option value="hourly">Hourly Budget</option>
+                        <option value="project">Project Budget</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="teamGroup" style="display: none;">
+                    <label for="budgetTeam">Team (Optional)</label>
+                    <select id="budgetTeam">
+                        <option value="">All Teams</option>
+                        <option value="marketing">Marketing</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="data_science">Data Science</option>
+                        <option value="product">Product</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="budgetAmount">Budget Amount ($) *</label>
+                    <input type="number" id="budgetAmount" placeholder="e.g., 1000" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="alertThreshold">Alert at (%) *</label>
+                    <input type="number" id="alertThreshold" placeholder="90" min="0" max="100" value="90" required>
+                    <small style="color: #666;">Get alerted when budget reaches this percentage</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="blockOnExceed"> Block requests when budget exceeded
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Create Budget</button>
+                    <button type="button" class="btn-cancel" onclick="closeCreateBudgetModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Budget Modal -->
+    <div class="modal" id="editBudgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Budget</h2>
+                <button class="close-btn" onclick="closeEditBudgetModal()">×</button>
+            </div>
+
+            <form id="editBudgetForm" onsubmit="submitEditBudget(event)">
+                <input type="hidden" id="editBudgetId">
+
+                <div class="form-group">
+                    <label for="editBudgetAmount">Budget Amount ($) *</label>
+                    <input type="number" id="editBudgetAmount" placeholder="e.g., 1000" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editAlertThreshold">Alert at (%) *</label>
+                    <input type="number" id="editAlertThreshold" placeholder="90" min="0" max="100" value="90" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="editBlockOnExceed"> Block requests when budget exceeded
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Update Budget</button>
+                    <button type="button" class="btn-cancel" onclick="closeEditBudgetModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Sample budget data (in production, fetch from API)
+        const budgets = [
+            {
+                id: 1,
+                type: 'monthly',
+                team: null,
+                amount: 1000,
+                used: 650,
+                status: 'warning',
+                threshold: 90
+            },
+            {
+                id: 2,
+                type: 'daily',
+                team: 'engineering',
+                amount: 100,
+                used: 65,
+                status: 'warning',
+                threshold: 90
+            },
+            {
+                id: 3,
+                type: 'monthly',
+                team: 'marketing',
+                amount: 500,
+                used: 250,
+                status: 'healthy',
+                threshold: 90
+            }
+        ];
+
+        function renderBudgets() {
+            const grid = document.getElementById('budgetGrid');
+            grid.innerHTML = budgets.map(budget => `
+                <div class="budget-card">
+                    <div class="budget-card-header">
+                        <span class="budget-type">${budget.type}</span>
+                        <div class="budget-menu">
+                            <i class="fas fa-ellipsis-v" onclick="showBudgetMenu(${budget.id})"></i>
+                        </div>
+                    </div>
+                    <h3>${budget.team ? budget.team.toUpperCase() : 'ALL TEAMS'}</h3>
+                    <p class="budget-team">Team: ${budget.team || 'All'}</p>
+                    
+                    <div class="budget-amount">
+                        <span class="budget-amount-value">$${budget.amount}</span>
+                        <span class="budget-amount-label">limit</span>
+                    </div>
+
+                    <div class="budget-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(budget.used / budget.amount) * 100}%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>$${budget.used.toFixed(2)} used</span>
+                            <span>${((budget.used / budget.amount) * 100).toFixed(0)}%</span>
+                        </div>
+                    </div>
+
+                    <div class="budget-status ${budget.status}">
+                        <i class="fas fa-${budget.status === 'healthy' ? 'check-circle' : budget.status === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i>
+                        ${budget.status.charAt(0).toUpperCase() + budget.status.slice(1)}
+                    </div>
+
+                    <div class="budget-actions">
+                        <button class="btn-secondary" onclick="openEditBudgetModal(${budget.id})">Edit</button>
+                        <button class="btn-secondary" onclick="deleteBudget(${budget.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openCreateBudgetModal() {
+            document.getElementById('createBudgetModal').classList.add('active');
+        }
+
+        function closeCreateBudgetModal() {
+            document.getElementById('createBudgetModal').classList.remove('active');
+            document.getElementById('createBudgetForm').reset();
+        }
+
+        function openEditBudgetModal(id) {
+            const budget = budgets.find(b => b.id === id);
+            if (budget) {
+                document.getElementById('editBudgetId').value = id;
+                document.getElementById('editBudgetAmount').value = budget.amount;
+                document.getElementById('editAlertThreshold').value = budget.threshold;
+                document.getElementById('editBudgetModal').classList.add('active');
+            }
+        }
+
+        function closeEditBudgetModal() {
+            document.getElementById('editBudgetModal').classList.remove('active');
+        }
+
+        function updateTeamFieldVisibility() {
+            const type = document.getElementById('budgetType').value;
+            const teamGroup = document.getElementById('teamGroup');
+            teamGroup.style.display = type === 'project' ? 'block' : 'none';
+        }
+
+        function submitBudget(e) {
+            e.preventDefault();
+            // In production, send to API
+            const formData = {
+                type: document.getElementById('budgetType').value,
+                team: document.getElementById('budgetTeam').value || null,
+                amount: parseFloat(document.getElementById('budgetAmount').value),
+                threshold: parseInt(document.getElementById('alertThreshold').value),
+                blockOnExceed: document.getElementById('blockOnExceed').checked
+            };
+            console.log('Creating budget:', formData);
+            closeCreateBudgetModal();
+            // Refresh budgets
+            renderBudgets();
+        }
+
+        function submitEditBudget(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editBudgetId').value);
+            const budget = budgets.find(b => b.id === id);
+            if (budget) {
+                budget.amount = parseFloat(document.getElementById('editBudgetAmount').value);
+                budget.threshold = parseInt(document.getElementById('editAlertThreshold').value);
+            }
+            closeEditBudgetModal();
+            renderBudgets();
+        }
+
+        function deleteBudget(id) {
+            if (confirm('Delete this budget?')) {
+                const index = budgets.findIndex(b => b.id === id);
+                if (index > -1) {
+                    budgets.splice(index, 1);
+                    renderBudgets();
+                }
+            }
+        }
+
+        // Initialize
+        renderBudgets();
+    </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - OpenAI Waste Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/landing.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #111827;
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #111827;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+            display: block;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #7f1d1d;
+            border-left: 4px solid #ef4444;
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: #764ba2;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 40px 25px;
+                margin: 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-lock"></i>
+            <h1>Admin Panel</h1>
+            <p>Manage your OpenAI Waste Analyzer</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" onclick="switchTab('setup')">Setup</button>
+        </div>
+
+        <!-- LOGIN TAB -->
+        <div id="login" class="tab-content active">
+            <div id="loginMessage" class="message"></div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required placeholder="Enter your password">
+                </div>
+                <div class="loading" id="loginLoading">
+                    <i class="fas fa-spinner fa-spin"></i> Logging in...
+                </div>
+                <button type="submit" class="submit-btn" id="loginBtn">Login</button>
+            </form>
+        </div>
+
+        <!-- SETUP TAB -->
+        <div id="setup" class="tab-content">
+            <div id="setupMessage" class="message"></div>
+            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">Create your first admin account. This option only works if no admin exists yet.</p>
+            <form onsubmit="handleSetup(event)">
+                <div class="form-group">
+                    <label for="setupEmail">Email Address</label>
+                    <input type="email" id="setupEmail" name="email" required placeholder="admin@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="setupPassword">Password</label>
+                    <input type="password" id="setupPassword" name="password" required placeholder="Create a strong password">
+                </div>
+                <div class="form-group">
+                    <label for="setupPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="setupPasswordConfirm" name="passwordConfirm" required placeholder="Confirm your password">
+                </div>
+                <div class="loading" id="setupLoading">
+                    <i class="fas fa-spinner fa-spin"></i> Creating account...
+                </div>
+                <button type="submit" class="submit-btn" id="setupBtn">Create Account</button>
+            </form>
+        </div>
+
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginLoading = document.getElementById('loginLoading');
+            const loginMessage = document.getElementById('loginMessage');
+            
+            loginBtn.disabled = true;
+            loginLoading.classList.add('show');
+            loginMessage.innerHTML = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loginMessage.className = 'message success';
+                    loginMessage.innerHTML = '✓ Login successful! Redirecting...';
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/admin/dashboard';
+                    }, 1500);
+                } else {
+                    loginMessage.className = 'message error';
+                    loginMessage.innerHTML = '✗ ' + (data.error || 'Login failed. Please try again.');
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                loginMessage.className = 'message error';
+                loginMessage.innerHTML = '✗ An error occurred. Please try again.';
+                loginBtn.disabled = false;
+            } finally {
+                loginLoading.classList.remove('show');
+            }
+        }
+
+        async function handleSetup(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('setupEmail').value;
+            const password = document.getElementById('setupPassword').value;
+            const passwordConfirm = document.getElementById('setupPasswordConfirm').value;
+            const setupBtn = document.getElementById('setupBtn');
+            const setupLoading = document.getElementById('setupLoading');
+            const setupMessage = document.getElementById('setupMessage');
+            
+            // Validate passwords match
+            if (password !== passwordConfirm) {
+                setupMessage.className = 'message error';
+                setupMessage.innerHTML = '✗ Passwords do not match.';
+                return;
+            }
+            
+            // Validate password strength
+            if (password.length < 8) {
+                setupMessage.className = 'message error';
+                setupMessage.innerHTML = '✗ Password must be at least 8 characters long.';
+                return;
+            }
+            
+            setupBtn.disabled = true;
+            setupLoading.classList.add('show');
+            setupMessage.innerHTML = '';
+            
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('password', password);
+                
+                const response = await fetch('/admin/setup', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    setupMessage.className = 'message success';
+                    setupMessage.innerHTML = '✓ ' + data.message;
+                    document.getElementById('setupEmail').value = '';
+                    document.getElementById('setupPassword').value = '';
+                    document.getElementById('setupPasswordConfirm').value = '';
+                    
+                    setTimeout(() => {
+                        // Switch to login tab
+                        document.getElementById('login').classList.add('active');
+                        document.getElementById('setup').classList.remove('active');
+                        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                        document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+                    }, 1500);
+                } else {
+                    setupMessage.className = 'message error';
+                    setupMessage.innerHTML = '✗ ' + (data.error || 'Setup failed. Admin may already exist.');
+                    setupBtn.disabled = false;
+                }
+            } catch (error) {
+                setupMessage.className = 'message error';
+                setupMessage.innerHTML = '✗ An error occurred. Please try again.';
+                setupBtn.disabled = false;
+            } finally {
+                setupLoading.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>

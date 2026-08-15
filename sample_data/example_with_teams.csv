@@ -1,0 +1,31 @@
+model,prompt_tokens,completion_tokens,team,prompt
+gpt-4,1200,450,Marketing,Generate blog post about AI trends in 2024
+gpt-4,850,320,Marketing,Create social media campaign copy for product launch
+gpt-4,450,180,Marketing,Write email newsletter content
+gpt-3.5-turbo,320,120,Marketing,Summarize competitor analysis
+gpt-3.5-turbo,280,95,Marketing,Generate product descriptions
+gpt-4,2100,890,Engineering,Code review and suggestions for API endpoint
+gpt-4,1850,720,Engineering,Debug memory leak in production service
+gpt-4,1450,580,Engineering,Implement authentication middleware
+gpt-4,980,410,Engineering,Optimize database queries
+gpt-3.5-turbo,650,240,Engineering,Write unit tests for user service
+gpt-3.5-turbo,520,180,Engineering,Generate API documentation
+gpt-3.5-turbo,380,140,Engineering,Refactor legacy code
+gpt-4,1650,680,Data Science,Analyze customer churn patterns
+gpt-4,1420,590,Data Science,Build predictive model for sales forecasting
+gpt-4,980,420,Data Science,Feature engineering for ML pipeline
+gpt-3.5-turbo,720,280,Data Science,Clean and preprocess dataset
+gpt-3.5-turbo,580,210,Data Science,Generate data visualization code
+gpt-4,420,180,Product,Write PRD for new feature
+gpt-3.5-turbo,320,140,Product,Summarize user feedback
+gpt-3.5-turbo,280,95,Product,Generate user stories
+gpt-4,1800,750,Engineering,Implement real-time notification system
+gpt-4,1200,510,Engineering,Design microservices architecture
+gpt-3.5-turbo,450,160,Marketing,Create ad copy variations
+gpt-3.5-turbo,380,130,Marketing,Generate SEO meta descriptions
+gpt-4,950,400,Data Science,Train recommendation algorithm
+gpt-3.5-turbo,520,190,Data Science,Validate model performance
+gpt-4,680,290,Product,Create feature comparison matrix
+gpt-3.5-turbo,420,150,Product,Draft release notes
+gpt-4,1500,620,Engineering,Implement caching layer
+gpt-4,890,370,Marketing,Generate content calendar

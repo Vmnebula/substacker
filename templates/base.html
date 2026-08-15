@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Substacker - AI Cost Intelligence Platform{% endblock %}</title>
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="Substacker: Team-level AI cost attribution and budget management across multiple LLM providers">
+    <meta name="theme-color" content="#667eea">
+    <meta property="og:title" content="Substacker - AI Cost Intelligence">
+    <meta property="og:description" content="See which teams spend what on AI. Multi-provider support with real-time alerts.">
+    <meta property="og:image" content="/static/assets/og-image.jpg">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/landing.css">
+    <link rel="stylesheet" href="/static/style.css">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "tx9c01sb6z");
+    </script>
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    <!-- Scripts -->
+    <script src="/static/landing.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

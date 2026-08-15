@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - Substacker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/style.css">
+{% endblock %}
+
+{% block content %}
+    <nav class="user-navbar">
+        <div class="container">
+            <div class="user-navbar-brand">
+                <i class="fas fa-chart-line"></i>
+                SDK Dashboard
+            </div>
+            <div class="user-navbar-menu">
+                <span id="userEmail">Loading...</span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="user-container">
+        <div id="content">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2em; margin-bottom: 10px;"></i>
+                <p>Loading your dashboard...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get API key from URL or session
+        const apiKey = localStorage.getItem('substacker_api_key');
+        
+        if (!apiKey) {
+            // Redirect to login
+            window.location.href = '/admin/sdk-keys';
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/dashboard/realtime', {
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('substacker_api_key');
+                    window.location.href = '/admin/sdk-keys';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load dashboard');
+                }
+
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error-msg">
+                        <i class="fas fa-exclamation-circle"></i>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function renderDashboard(data) {
+            const teams = data.team_breakdown || {};
+            const recentActivity = data.recent_activity || [];
+            
+            let html = `
+                <h1 style="margin-bottom: 30px; color: #333;">Usage & Cost Dashboard</h1>
+
+                <div class="metrics-grid">
+                    <!-- Total Cost Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-wallet"></i>
+                            <span class="metric-label">Total Cost (30d)</span>
+                            <span class="badge badge-primary">Real-time</span>
+                        </div>
+                        <div class="metric-value">$${data.total_cost.toFixed(2)}</div>
+                        <div class="metric-detail">
+                            <i class="fas fa-arrow-up text-warning"></i>
+                            ${((data.total_cost - data.previous_cost) / data.previous_cost * 100).toFixed(1)}% vs last month
+                        </div>
+                    </div>
+
+                    <!-- Today's Cost Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-calendar-today"></i>
+                            <span class="metric-label">Today's Cost</span>
+                            <span class="badge badge-success">${new Date().toLocaleDateString()}</span>
+                        </div>
+                        <div class="metric-value">$${data.today_cost.toFixed(2)}</div>
+                        <div class="metric-detail">
+                            <i class="fas fa-clock"></i>
+                            Updated 2 minutes ago
+                        </div>
+                    </div>
+
+                    <!-- Total Calls Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-phone"></i>
+                            <span class="metric-label">API Calls</span>
+                            <span class="badge badge-info">30 days</span>
+                        </div>
+                        <div class="metric-value">${recentActivity.length.toLocaleString()}</div>
+                        <div class="metric-detail">
+                            <i class="fas fa-chart-line text-success"></i>
+                            Avg: ${(recentActivity.length / 30).toFixed(0)} calls/day
+                        </div>
+                    </div>
+
+                    <!-- Avg Cost per Call -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span class="metric-label">Avg Cost/Call</span>
+                        </div>
+                        <div class="metric-value">$${(data.total_cost / (recentActivity.length || 1)).toFixed(4)}</div>
+                        <div class="metric-detail">
+                            <i class="fas fa-info-circle"></i>
+                            Calculated from recent activity
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Team breakdown
+            if (Object.keys(teams).length > 0) {
+                html += `
+                    <div class="team-breakdown">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-users"></i>
+                                Cost by Team
+                            </h3>
+                            <p class="section-subtitle">${Object.keys(teams).length} teams tracked</p>
+                        </div>
+                `;
+                
+                // Create sorted teams by cost
+                const sortedTeams = Object.entries(teams)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10);
+
+                sortedTeams.forEach((item, index) => {
+                    const [team, cost] = item;
+                    const percent = (cost / data.total_cost * 100).toFixed(1);
+                    const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'];
+                    const color = colors[index % colors.length];
+
+                    html += `
+                        <div class="team-item">
+                            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                                <div class="team-indicator" style="background-color: ${color};"></div>
+                                <div>
+                                    <div class="team-name">${team}</div>
+                                    <div class="team-detail">${percent}% of total</div>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="team-cost">$${cost.toFixed(2)}</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percent}%; background-color: ${color};"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            }
+
+            // Recent activity
+            if (recentActivity.length > 0) {
+                html += `
+                    <div class="recent-activity">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-history"></i>
+                                Recent API Calls
+                            </h3>
+                            <p class="section-subtitle">Last 20 calls in real-time</p>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="activity-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model</th>
+                                        <th>Team</th>
+                                        <th>Tokens</th>
+                                        <th>Cost</th>
+                                        <th>Response Time</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                recentActivity.slice(0, 20).forEach(item => {
+                    const time = new Date(item.timestamp).toLocaleTimeString();
+                    const statusIcon = item.status === 'success' ? 'check-circle' : 'exclamation-circle';
+                    const statusColor = item.status === 'success' ? '#10b981' : '#ef4444';
+                    
+                    html += `
+                        <tr>
+                            <td>
+                                <span class="model-badge">${item.model}</span>
+                            </td>
+                            <td>
+                                <span class="team-tag">${item.team || 'N/A'}</span>
+                            </td>
+                            <td>${(item.prompt_tokens + item.completion_tokens).toLocaleString() || 'N/A'}</td>
+                            <td>
+                                <strong style="color: #667eea;">$${item.cost.toFixed(4)}</strong>
+                            </td>
+                            <td>
+                                <span class="response-time">${(item.response_time || 0).toFixed(2)}s</span>
+                            </td>
+                            <td>
+                                <i class="fas fa-${statusIcon}" style="color: ${statusColor};"></i>
+                            </td>
+                            <td><small>${time}</small></td>
+                        </tr>
+                    `;
+                });
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('content').innerHTML = html;
+            document.getElementById('userEmail').textContent = 'User Dashboard';
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('substacker_api_key');
+            window.location.href = '/';
+        });
+
+        // Load dashboard on page load
+        loadDashboard();
+
+        // Refresh every 10 seconds
+        setInterval(loadDashboard, 10000);
+    </script>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

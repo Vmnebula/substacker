@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Cost Tracking - Substacker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .realtime-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            border-radius: 20px;
+            background: #f0f0f0;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        .status-dot.connecting {
+            background: #f59e0b;
+        }
+
+        .status-dot.disconnected {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(30, 58, 95, 0.3);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            font-family: 'Monaco', monospace;
+        }
+
+        .metric-change {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .metric-change.positive {
+            color: #86efac;
+        }
+
+        .metric-change.negative {
+            color: #fca5a5;
+        }
+
+        .updates-section {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .updates-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .update-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .update-item {
+            background: white;
+            border-left: 4px solid #d4af37;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .update-item.cost-update {
+            border-left-color: #10b981;
+        }
+
+        .update-item.anomaly {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .update-time {
+            font-size: 0.75rem;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .update-message {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .update-data {
+            font-size: 0.85rem;
+            color: #666;
+            font-family: 'Monaco', monospace;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .connection-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #0369a1;
+        }
+
+        .connection-info strong {
+            color: #0284c7;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #142d47;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        @media (max-width: 768px) {
+            .realtime-container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .metric-card {
+                padding: 15px;
+            }
+
+            .metric-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="realtime-container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-chart-line"></i>
+                Real-time Cost Tracking
+            </h1>
+            <div class="connection-status">
+                <div class="status-dot connecting" id="statusDot"></div>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-secondary" onclick="location.href='/'">← Back to Dashboard</button>
+            <button class="btn-primary" onclick="clearUpdates()">Clear Updates</button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Current Session Cost
+                </div>
+                <div class="metric-value" id="sessionCost">$0.00</div>
+                <div class="metric-change">Today</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="fas fa-chart-line"></i>
+                    Requests
+                </div>
+                <div class="metric-value" id="requestCount">0</div>
+                <div class="metric-change" id="requestChange">+0 this hour</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Anomalies
+                </div>
+                <div class="metric-value" id="anomalyCount">0</div>
+                <div class="metric-change" id="anomalyChange">Alert status</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">
+                    <i class="fas fa-clock"></i>
+                    Update Frequency
+                </div>
+                <div class="metric-value" id="updateFreq">--</div>
+                <div class="metric-change">Last 5 minutes</div>
+            </div>
+        </div>
+
+        <div class="updates-section">
+            <div class="updates-header">
+                <i class="fas fa-bell"></i>
+                Live Updates
+            </div>
+            <div class="update-feed" id="updateFeed">
+                <div class="empty-state">
+                    <i class="fas fa-wifi"></i>
+                    <p>Waiting for real-time updates...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="connection-info">
+            <strong>📊 Connection Status:</strong><br>
+            Connection ID: <span id="connectionId">--</span><br>
+            Server: <span id="serverStatus">Disconnected</span><br>
+            Events Received: <span id="eventsReceived">0</span>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket client for real-time updates
+        class RealtimeClient {
+            constructor() {
+                this.ws = null;
+                this.connectionId = null;
+                this.sessionCost = 0;
+                this.requestCount = 0;
+                this.anomalyCount = 0;
+                this.eventsReceived = 0;
+                this.updates = [];
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+                this.reconnectDelay = 3000;
+            }
+
+            connect() {
+                // Determine WebSocket URL
+                const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+                const host = window.location.host;
+                const wsUrl = `${protocol}://${host}/ws`;
+
+                try {
+                    this.ws = new WebSocket(wsUrl);
+
+                    this.ws.onopen = () => this.onOpen();
+                    this.ws.onmessage = (event) => this.onMessage(event);
+                    this.ws.onerror = (error) => this.onError(error);
+                    this.ws.onclose = () => this.onClose();
+                } catch (error) {
+                    console.error('WebSocket connection error:', error);
+                    this.updateStatus('disconnected', 'Connection failed');
+                    this.scheduleReconnect();
+                }
+            }
+
+            onOpen() {
+                console.log('WebSocket connected');
+                this.reconnectAttempts = 0;
+                this.updateStatus('connected', 'Connected');
+                document.getElementById('serverStatus').textContent = 'Connected';
+            }
+
+            onMessage(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    this.eventsReceived++;
+                    document.getElementById('eventsReceived').textContent = this.eventsReceived;
+
+                    // Handle different event types
+                    switch (data.type) {
+                        case 'connected':
+                            this.connectionId = data.connection_id;
+                            document.getElementById('connectionId').textContent = this.connectionId;
+                            this.addUpdate('system', 'Connected to real-time updates', data);
+                            break;
+
+                        case 'cost_update':
+                            this.handleCostUpdate(data.data);
+                            break;
+
+                        case 'analysis_complete':
+                            this.handleAnalysisComplete(data.data);
+                            break;
+
+                        case 'anomaly_detected':
+                            this.handleAnomaly(data.data);
+                            break;
+
+                        case 'new_lead':
+                            this.handleNewLead(data.data);
+                            break;
+
+                        default:
+                            this.addUpdate('info', `Received: ${data.type}`, data.data);
+                    }
+                } catch (error) {
+                    console.error('Message parsing error:', error);
+                }
+            }
+
+            handleCostUpdate(data) {
+                this.sessionCost = data.cost || this.sessionCost;
+                this.requestCount = data.requests || this.requestCount;
+
+                document.getElementById('sessionCost').textContent = `$${this.sessionCost.toFixed(2)}`;
+                document.getElementById('requestCount').textContent = this.requestCount;
+
+                this.addUpdate('cost-update', `Cost update: $${data.cost?.toFixed(2)}`, data);
+            }
+
+            handleAnalysisComplete(data) {
+                const message = `Analysis complete: ${data.email || 'Unknown'} - Found $${data.waste_found?.toFixed(2) || 0} waste`;
+                this.addUpdate('analysis', message, data);
+            }
+
+            handleAnomaly(data) {
+                this.anomalyCount++;
+                document.getElementById('anomalyCount').textContent = this.anomalyCount;
+                document.getElementById('anomalyChange').textContent = '⚠️ Alert!';
+
+                const message = `🚨 Anomaly detected: ${data.description || 'Unusual spending pattern'}`;
+                this.addUpdate('anomaly', message, data);
+            }
+
+            handleNewLead(data) {
+                const message = `📧 New lead: ${data.email}`;
+                this.addUpdate('lead', message, data);
+            }
+
+            addUpdate(type, message, data) {
+                const timestamp = new Date().toLocaleTimeString();
+                const update = {
+                    type,
+                    message,
+                    data,
+                    timestamp
+                };
+
+                this.updates.push(update);
+                this.renderUpdate(update);
+
+                // Keep only last 50 updates in memory
+                if (this.updates.length > 50) {
+                    this.updates.shift();
+                }
+            }
+
+            renderUpdate(update) {
+                const feed = document.getElementById('updateFeed');
+
+                // Remove empty state if exists
+                const emptyState = feed.querySelector('.empty-state');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+
+                const updateEl = document.createElement('div');
+                updateEl.className = `update-item ${update.type}`;
+                updateEl.innerHTML = `
+                    <div class="update-time">${update.timestamp}</div>
+                    <div class="update-message">${update.message}</div>
+                    <div class="update-data">${JSON.stringify(update.data).substring(0, 150)}...</div>
+                `;
+
+                feed.insertBefore(updateEl, feed.firstChild);
+
+                // Keep feed scrollable, remove old items if > 100
+                const items = feed.querySelectorAll('.update-item');
+                if (items.length > 100) {
+                    items[items.length - 1].remove();
+                }
+            }
+
+            onError(error) {
+                console.error('WebSocket error:', error);
+                this.updateStatus('disconnected', 'Connection error');
+            }
+
+            onClose() {
+                console.log('WebSocket disconnected');
+                this.updateStatus('disconnected', 'Disconnected');
+                document.getElementById('serverStatus').textContent = 'Disconnected';
+                this.scheduleReconnect();
+            }
+
+            scheduleReconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+                    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+                    setTimeout(() => this.connect(), delay);
+                } else {
+                    console.error('Max reconnect attempts reached');
+                    this.updateStatus('disconnected', 'Failed to reconnect');
+                }
+            }
+
+            updateStatus(status, message) {
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('statusText');
+
+                dot.className = `status-dot ${status}`;
+                text.textContent = message;
+            }
+        }
+
+        // Initialize real-time client
+        const client = new RealtimeClient();
+
+        // Connect when page loads
+        window.addEventListener('load', () => {
+            client.connect();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (client.ws) {
+                client.ws.close();
+            }
+        });
+
+        // Helper functions
+        function clearUpdates() {
+            const feed = document.getElementById('updateFeed');
+            feed.innerHTML = '<div class="empty-state"><i class="fas fa-check"></i><p>Updates cleared</p></div>';
+            client.updates = [];
+        }
+    </script>
+</body>
+</html>

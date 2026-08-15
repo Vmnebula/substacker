@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - Substacker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #142d47 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .section {
+            margin-bottom: 50px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 30px;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            font-size: 1.8em;
+            color: #1e3a5f;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h3 {
+            font-size: 1.3em;
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #d4af37;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+        .method.post { background: #10b981; color: white; }
+        .method.get { background: #3b82f6; color: white; }
+        .method.patch { background: #f59e0b; color: white; }
+        .method.delete { background: #ef4444; color: white; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .badge.required { background: #fee2e2; color: #991b1b; }
+        .badge.optional { background: #e0e7ff; color: #3730a3; }
+        .example {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        .tab-btn.active {
+            color: #1e3a5f;
+            border-bottom-color: #1e3a5f;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #d4af37;
+        }
+        .feature-card h4 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-rocket"></i> Substacker API Documentation</h1>
+            <p>Track OpenAI API usage in real-time with team attribution and cost analysis</p>
+        </header>
+
+        <div class="content">
+            <!-- Getting Started Section -->
+            <div class="section">
+                <h2><i class="fas fa-play"></i> Getting Started</h2>
+                <p>Substacker provides two ways to track OpenAI API usage:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-code"></i> SDK Wrapper (Recommended)</h4>
+                        <p>Automatically intercept OpenAI calls and track usage with one line of code.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-plug"></i> REST API</h4>
+                        <p>Manually POST usage data for custom integrations or non-OpenAI providers.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-chart-line"></i> Real-time Dashboard</h4>
+                        <p>View team costs, model usage, and anomaly alerts in real-time.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-key"></i> API Key Management</h4>
+                        <p>Create and revoke API keys from the admin dashboard.</p>
+                    </div>
+                </div>
+
+                <h3>Quick Links</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Production URL:</strong> https://substacker.nayacloud.com</li>
+                    <li><strong>Admin Dashboard:</strong> https://substacker.nayacloud.com/admin/dashboard</li>
+                    <li><strong>SDK Keys:</strong> https://substacker.nayacloud.com/admin/sdk-keys</li>
+                    <li><strong>Health Check:</strong> https://substacker.nayacloud.com/health</li>
+                </ul>
+            </div>
+
+            <!-- SDK Integration Section -->
+            <div class="section">
+                <h2><i class="fas fa-cube"></i> SDK Integration (Python)</h2>
+                
+                <h3>Installation</h3>
+                <pre><code class="language-bash">pip install substacker-sdk</code></pre>
+
+                <h3>Basic Usage</h3>
+                <pre><code class="language-python">from openai import OpenAI
+from substacker import track_openai
+
+# Initialize OpenAI client
+openai_client = OpenAI(api_key="your-openai-api-key")
+
+# Wrap with Substacker tracking
+openai = track_openai(
+    openai_client,
+    api_key="sk_substacker_xxxx",  # Get from admin dashboard → SDK Keys
+    team="engineering"
+    # endpoint defaults to https://substacker.nayacloud.com/api/track
+)
+
+# Use OpenAI normally - tracking happens automatically
+response = openai.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "user", "content": "What is machine learning?"}
+    ]
+)
+
+print(response.choices[0].message.content)
+# Tracking sent silently in background</code></pre>
+
+                <h3>Advanced Configuration</h3>
+                <pre><code class="language-python">from openai import OpenAI
+from substacker import track_openai
+
+openai = track_openai(
+    OpenAI(api_key="sk-..."),
+    api_key="sk_substacker_xxxx",
+    team="data-science",
+    endpoint="https://substacker.nayacloud.com/api/track"  # Override if needed
+)</code></pre>
+
+                <div class="note">
+                    <strong><i class="fas fa-info-circle"></i> Pro Tip:</strong> The SDK gracefully handles errors. If tracking fails, your application continues to work normally. Tracking is non-blocking and has a 2-second timeout.
+                </div>
+            </div>
+
+            <!-- REST API Section -->
+            <div class="section">
+                <h2><i class="fas fa-exchange-alt"></i> REST API</h2>
+
+                <h3>Authentication</h3>
+                <p>All API requests require the <code>X-API-Key</code> header:</p>
+                <pre><code class="language-bash">curl https://substacker.nayacloud.com/api/track \
+  -H "X-API-Key: sk_substacker_xxxx" \
+  -H "Content-Type: application/json" \
+  -d '{...}'</code></pre>
+
+                <h3>Track API Usage</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span> /api/track
+                </div>
+
+                <p>Log an API call to Substacker.</p>
+
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>team</code></td>
+                        <td>string</td>
+                        <td><span class="badge required">Yes</span></td>
+                        <td>Team name for cost attribution (e.g., "engineering", "marketing")</td>
+                    </tr>
+                    <tr>
+                        <td><code>model</code></td>
+                        <td>string</td>
+                        <td><span class="badge required">Yes</span></td>
+                        <td>Model name (e.g., "gpt-4", "gpt-3.5-turbo", "claude-3-opus")</td>
+                    </tr>
+                    <tr>
+                        <td><code>prompt_tokens</code></td>
+                        <td>integer</td>
+                        <td><span class="badge required">Yes</span></td>
+                        <td>Number of tokens in prompt</td>
+                    </tr>
+                    <tr>
+                        <td><code>completion_tokens</code></td>
+                        <td>integer</td>
+                        <td><span class="badge required">Yes</span></td>
+                        <td>Number of tokens in completion</td>
+                    </tr>
+                    <tr>
+                        <td><code>response_time</code></td>
+                        <td>float</td>
+                        <td><span class="badge optional">No</span></td>
+                        <td>Response time in seconds (optional)</td>
+                    </tr>
+                    <tr>
+                        <td><code>provider</code></td>
+                        <td>string</td>
+                        <td><span class="badge optional">No</span></td>
+                        <td>Provider (e.g., "openai", "anthropic", "google")</td>
+                    </tr>
+                </table>
+
+                <h4>Example Request</h4>
+                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/track \
+  -H "X-API-Key: sk_substacker_abc123..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "team": "engineering",
+    "model": "gpt-4",
+    "prompt_tokens": 150,
+    "completion_tokens": 250,
+    "response_time": 2.3
+  }'</code></pre>
+
+                <h4>Example Response (Success)</h4>
+                <pre><code class="language-json">{
+  "status": "tracked",
+  "cost": 0.0125,
+  "provider": "openai",
+  "model_recognized": true
+}</code></pre>
+
+                <h4>Example Response (Unknown Model)</h4>
+                <pre><code class="language-json">{
+  "status": "tracked",
+  "cost": 0.0,
+  "provider": "openai",
+  "model_recognized": false,
+  "warning": "Unknown model 'gpt-5-future'. Cost set to $0. Please update pricing data or contact support."
+}</code></pre>
+
+                <h3>Get Real-time Dashboard Data</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span> /api/dashboard/realtime
+                </div>
+
+                <p>Fetch real-time team cost breakdown and recent usage.</p>
+
+                <h4>Example Request</h4>
+                <pre><code class="language-bash">curl -X GET https://substacker.nayacloud.com/api/dashboard/realtime \
+  -H "X-API-Key: sk_substacker_abc123..."</code></pre>
+
+                <h4>Example Response</h4>
+                <pre><code class="language-json">{
+  "total_cost": 125.45,
+  "today_cost": 12.30,
+  "team_breakdown": {
+    "engineering": 75.20,
+    "marketing": 35.10,
+    "data-science": 15.15
+  },
+  "recent_activity": [
+    {
+      "model": "gpt-4",
+      "team": "engineering",
+      "cost": 0.0125,
+      "timestamp": "2025-10-30T14:23:45Z",
+      "response_time": 2.3
+    }
+  ],
+  "last_updated": "2025-10-30T14:30:12Z"
+}</code></pre>
+
+                <div class="note">
+                    <strong><i class="fas fa-info-circle"></i> Note:</strong> This endpoint returns data for the API key's owner only. Rate limited to 100 requests/minute.
+                </div>
+            </div>
+
+            <!-- Admin API Section -->
+            <div class="section">
+                <h2><i class="fas fa-shield-alt"></i> Admin API</h2>
+
+                <h3>Generate API Key</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span> /api/generate-key
+                </div>
+
+                <h4>Request</h4>
+                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/generate-key \
+  -H "Cookie: admin_token=..." \
+  -d "email=user@example.com"</code></pre>
+
+                <h4>Response</h4>
+                <pre><code class="language-json">{
+  "success": true,
+  "api_key": "sk_substacker_abc123...",
+  "key_prefix": "sk_substacker_abc"
+}</code></pre>
+
+                <div class="warning">
+                    <strong><i class="fas fa-exclamation"></i> Important:</strong> The API key is shown only once. Store it securely. If lost, generate a new key and revoke the old one.
+                </div>
+
+                <h3>Revoke API Key</h3>
+                <div class="endpoint">
+                    <span class="method post">POST</span> /api/revoke-key
+                </div>
+
+                <h4>Request</h4>
+                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/revoke-key \
+  -H "Cookie: admin_token=..." \
+  -d "key_prefix=sk_substacker_abc"</code></pre>
+
+                <h4>Response</h4>
+                <pre><code class="language-json">{
+  "success": true,
+  "message": "Key revoked"
+}</code></pre>
+            </div>
+
+            <!-- Error Codes Section -->
+            <div class="section">
+                <h2><i class="fas fa-exclamation-triangle"></i> Error Codes</h2>
+
+                <table>
+                    <tr>
+                        <th>Code</th>
+                        <th>Meaning</th>
+                        <th>Solution</th>
+                    </tr>
+                    <tr>
+                        <td>401</td>
+                        <td>Invalid or missing API key</td>
+                        <td>Check X-API-Key header. Regenerate key if expired/revoked.</td>
+                    </tr>
+                    <tr>
+                        <td>400</td>
+                        <td>Missing required fields</td>
+                        <td>Ensure team, model, prompt_tokens, completion_tokens are provided.</td>
+                    </tr>
+                    <tr>
+                        <td>429</td>
+                        <td>Rate limit exceeded</td>
+                        <td>Wait before making next request. Default: 1000 req/min for /api/track.</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>Server error</td>
+                        <td>Check status page or contact support.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Examples Section -->
+            <div class="section">
+                <h2><i class="fas fa-code"></i> Code Examples</h2>
+
+                <h3>Python (with SDK)</h3>
+                <pre><code class="language-python">from openai import OpenAI
+from substacker import track_openai
+
+# Create tracked client
+client = track_openai(
+    OpenAI(api_key="sk-..."),
+    api_key="sk_substacker_...",
+    team="engineering"
+)
+
+# Use normally
+for i in range(10):
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": f"Question {i}"}]
+    )
+    print(f"Answer: {response.choices[0].message.content}")</code></pre>
+
+                <h3>Python (REST API)</h3>
+                <pre><code class="language-python">import requests
+
+api_key = "sk_substacker_..."
+endpoint = "https://substacker.nayacloud.com/api/track"
+
+payload = {
+    "team": "engineering",
+    "model": "gpt-4",
+    "prompt_tokens": 150,
+    "completion_tokens": 250,
+    "response_time": 2.3
+}
+
+response = requests.post(
+    endpoint,
+    json=payload,
+    headers={"X-API-Key": api_key}
+)
+
+print(response.json())</code></pre>
+
+                <h3>Node.js (REST API)</h3>
+                <pre><code class="language-javascript">const axios = require('axios');
+
+const apiKey = 'sk_substacker_...';
+const endpoint = 'https://substacker.nayacloud.com/api/track';
+
+const payload = {
+  team: 'engineering',
+  model: 'gpt-4',
+  prompt_tokens: 150,
+  completion_tokens: 250,
+  response_time: 2.3
+};
+
+axios.post(endpoint, payload, {
+  headers: { 'X-API-Key': apiKey }
+}).then(response => {
+  console.log(response.data);
+}).catch(error => {
+  console.error(error.response.data);
+});</code></pre>
+
+                <h3>cURL</h3>
+                <pre><code class="language-bash">curl -X POST https://substacker.nayacloud.com/api/track \
+  -H "X-API-Key: sk_substractor_..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "team": "engineering",
+    "model": "gpt-4",
+    "prompt_tokens": 150,
+    "completion_tokens": 250,
+    "response_time": 2.3
+  }'</code></pre>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="section">
+                <h2><i class="fas fa-question-circle"></i> FAQ</h2>
+
+                <h3>How do I get started?</h3>
+                <p>1. Sign up for an account at the landing page. 2. Go to /admin/dashboard and login. 3. Navigate to SDK Keys. 4. Generate an API key. 5. Integrate with SDK (Python) or REST API.</p>
+
+                <h3>How is cost calculated?</h3>
+                <p>Costs are based on official OpenAI pricing for each model. Prompt tokens and completion tokens are multiplied by their respective rates. For custom models, contact support.</p>
+
+                <h3>Can I use Substacker with non-OpenAI providers?</h3>
+                <p>Yes! Use the REST API and set the provider field to "anthropic", "google", or "azure". We'll calculate costs based on each provider's pricing.</p>
+
+                <h3>What if I need to revoke an API key?</h3>
+                <p>Go to /admin/sdk-keys and click "Revoke" next to the key. It will be immediately deactivated. Any requests using that key will return 401 Unauthorized.</p>
+
+                <h3>Is tracking synchronous or asynchronous?</h3>
+                <p>The SDK sends tracking asynchronously in the background with a 2-second timeout. Your application will never be blocked by tracking failures.</p>
+
+                <h3>How often are costs updated?</h3>
+                <p>Costs are logged immediately upon tracking. The real-time dashboard updates in seconds.</p>
+
+                <h3>What about data privacy?</h3>
+                <p>Substacker never logs prompt/completion text—only token counts and metadata. All data is encrypted in transit (HTTPS) and at rest in Supabase.</p>
+            </div>
+
+            <!-- Support Section -->
+            <div class="section">
+                <h2><i class="fas fa-headset"></i> Support</h2>
+
+                <div class="success">
+                    <strong><i class="fas fa-envelope"></i> Email:</strong> support@substacker.nayacloud.com
+                </div>
+                <div class="success">
+                    <strong><i class="fas fa-bug"></i> Report Issues:</strong> GitHub Issues
+                </div>
+                <div class="success">
+                    <strong><i class="fas fa-chart-line"></i> Status:</strong> <a href="https://substacker.nayacloud.com/health">Health Check</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+        
+        // Make tables responsive
+        document.querySelectorAll('table').forEach(table => {
+            const wrapper = document.createElement('div');
+            wrapper.style.overflowX = 'auto';
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+        });
+    </script>
+</body>
+</html>

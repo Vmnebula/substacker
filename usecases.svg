@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+  <style>
+    .card { fill:#ffffff; stroke:#2c7a7b; stroke-width:2; rx:10; }
+    .heading { font: bold 18px sans-serif; fill:#0b5566; }
+    .desc { font: 13px sans-serif; fill:#2d3748; }
+    .icon { fill:#2c7a7b; }
+  </style>
+
+  <text x="40" y="36" class="heading">Substacker — Key Use Cases (Strategic)</text>
+  <text x="40" y="58" class="desc">A VM Nebula Product | High-level, non-sensitive descriptions for partner/fellowship materials.</text>
+
+  <!-- Use case 1 -->
+  <rect x="40" y="100" width="290" height="200" class="card"/>
+  <text x="80" y="140" class="heading">Multi-Cloud Optimization</text>
+  <text x="80" y="165" class="desc">Unified analytics across LLM providers. Recommends lower-cost model choices and routing.</text>
+  <text x="80" y="190" class="desc">Benefits: lower spend, latency controls, provider-agnostic insights.</text>
+
+  <!-- Use case 2 -->
+  <rect x="360" y="100" width="290" height="200" class="card"/>
+  <text x="400" y="140" class="heading">Predictive Cost Forecasting</text>
+  <text x="400" y="165" class="desc">Short-term and monthly forecasts using cloud ML. Helps finance teams budget and prevent overages.</text>
+  <text x="400" y="190" class="desc">Benefits: proactive alerts, budget planning, scenario analysis.</text>
+
+  <!-- Use case 3 -->
+  <rect x="680" y="100" width="260" height="200" class="card"/>
+  <text x="720" y="140" class="heading">AI-to-Revenue Mapping</text>
+  <text x="720" y="165" class="desc">Maps AI costs to customers and features (finance-grade), enabling chargeback and ROI analysis.</text>
+  <text x="720" y="190" class="desc">Benefits: unit economics, profitability per feature, CFO-ready reports.</text>
+
+  <!-- Bottom strategic notes -->
+  <rect x="40" y="330" width="900" height="200" fill="#f7fafc" stroke="#cbd5e1" rx="6"/>
+  <text x="60" y="360" class="heading">Strategic safeguards</text>
+  <text x="60" y="386" class="desc">This asset purposefully omits implementation specifics (exact model weights, heuristics, SQL, and routing rules). It conveys product value, integrations, and outcomes without exposing proprietary code.</text>
+  <text x="60" y="410" class="desc">Recommended use: submission materials, slide decks, partner briefings.</text>
+
+</svg>

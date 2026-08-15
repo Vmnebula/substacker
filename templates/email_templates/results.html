@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #10b981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+        .stats { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .stat { display: inline-block; margin: 10px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #10b981; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Your OpenAI Waste Analysis Results</h1>
+        </div>
+
+        <div class="content">
+            <p>Hi there,</p>
+
+            <p><strong>Great news!</strong> We've analyzed your OpenAI API usage and found some significant savings opportunities.</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">\${{ "%.2f"|format(total_waste) }}</div>
+                    <div>Total Waste Found</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">{{ "%.1f"|format(savings_percentage) }}%</div>
+                    <div>Potential Savings</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">\${{ "%.0f"|format(monthly_savings) }}</div>
+                    <div>Monthly Savings</div>
+                </div>
+            </div>
+
+            <p><strong>Top waste patterns we identified:</strong></p>
+            <ul>
+            {% for pattern in patterns %}
+                <li><strong>{{ pattern.type }}:</strong> {{ pattern.description }} - \${{ "%.2f"|format(pattern.waste_amount) }} wasted</li>
+            {% endfor %}
+            </ul>
+
+            <p><strong>Recommended actions:</strong></p>
+            <ol>
+            {% for rec in recommendations %}
+                <li><strong>{{ rec.action }}</strong> ({{ rec.effort }} effort, {{ rec.expected_savings }} savings)</li>
+            {% endfor %}
+            </ol>
+
+            <p>Ready to implement these changes? We can help you optimize your OpenAI usage and start saving money immediately.</p>
+
+            <center>
+                <a href="{{ implementation_url }}" class="button">Get Implementation Help →</a>
+            </center>
+
+            <p>Questions about your results? Just reply to this email.</p>
+
+            <p>Best,<br>
+            The OpenAI Waste Team</p>
+        </div>
+
+        <div class="footer">
+            <p>© {{ current_year }} OpenAI Waste Analyzer | <a href="#">Unsubscribe</a></p>
+        </div>
+    </div>
+</body>
+</html>

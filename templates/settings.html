@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Substacker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/admin.css">
+{% endblock %}
+
+{% block content %}
+
+    <!-- Navigation Bar -->
+    <nav class="admin-navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            <div class="navbar-menu">
+                <span class="admin-email" id="adminEmail">Settings & Configuration</span>
+            </div>
+        </div>
+    </nav>
+
+    <div style="display: flex; min-height: calc(100vh - 64px);">
+        <!-- Settings Sidebar Navigation -->
+        <aside class="settings-sidebar">
+            <div class="settings-nav">
+                <a href="#" class="settings-nav-item active" data-section="organization">
+                    <i class="fas fa-building"></i> Organization
+                </a>
+                <a href="#" class="settings-nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a href="#" class="settings-nav-item" data-section="security">
+                    <i class="fas fa-lock"></i> Security
+                </a>
+                <a href="#" class="settings-nav-item" data-section="team-members">
+                    <i class="fas fa-users"></i> Team Members
+                </a>
+                <a href="#" class="settings-nav-item" data-section="integrations">
+                    <i class="fas fa-puzzle-piece"></i> Integrations
+                </a>
+                <a href="#" class="settings-nav-item" data-section="billing">
+                    <i class="fas fa-credit-card"></i> Billing
+                </a>
+                <a href="#" class="settings-nav-item" data-section="api-keys">
+                    <i class="fas fa-key"></i> API Keys
+                </a>
+            </div>
+        </aside>
+
+        <!-- Settings Content -->
+        <main class="settings-content" style="padding: 30px;">
+
+            <!-- ===== ORGANIZATION SECTION ===== -->
+            <section id="organization" class="settings-section active">
+                <h2 class="section-title">Organization Settings</h2>
+                <p class="section-description">Manage your organization's basic information and preferences</p>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Basic Information</h3>
+                    <div class="form-group">
+                        <label>Organization Name</label>
+                        <input type="text" id="orgName" class="form-input" placeholder="Your organization name">
+                    </div>
+                    <div class="form-group">
+                        <label>Organization Email</label>
+                        <input type="email" id="orgEmail" class="form-input" placeholder="contact@organization.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Organization URL</label>
+                        <input type="url" id="orgUrl" class="form-input" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Time Zone</label>
+                        <select id="timeZone" class="form-input">
+                            <option value="">Select time zone...</option>
+                            <option value="UTC">UTC</option>
+                            <option value="EST">Eastern Time</option>
+                            <option value="CST">Central Time</option>
+                            <option value="MST">Mountain Time</option>
+                            <option value="PST">Pacific Time</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Billing Information</h3>
+                    <div class="form-group">
+                        <label>Billing Email</label>
+                        <input type="email" id="billingEmail" class="form-input" placeholder="billing@organization.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Billing Address</label>
+                        <input type="text" id="billingAddress" class="form-input" placeholder="Street address">
+                    </div>
+                    <div class="form-group">
+                        <label>Tax ID (Optional)</label>
+                        <input type="text" id="taxId" class="form-input" placeholder="Tax ID or VAT number">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button id="saveOrgBtn" class="action-button primary">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                    <button id="resetOrgBtn" class="action-button secondary">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== NOTIFICATIONS SECTION ===== -->
+            <section id="notifications" class="settings-section">
+                <h2 class="section-title">Notification Preferences</h2>
+                <p class="section-description">Configure how you receive alerts and notifications</p>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Email Notifications</h3>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Cost Alerts</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="emailCostAlerts" checked>
+                                <label for="emailCostAlerts"></label>
+                            </div>
+                        </label>
+                        <small>Send email when costs exceed threshold</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Daily Summary</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="emailDailySummary" checked>
+                                <label for="emailDailySummary"></label>
+                            </div>
+                        </label>
+                        <small>Receive daily cost summary at 9 AM</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Weekly Report</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="emailWeeklyReport" checked>
+                                <label for="emailWeeklyReport"></label>
+                            </div>
+                        </label>
+                        <small>Receive weekly analytics report</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Anomaly Detection</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="emailAnomalies" checked>
+                                <label for="emailAnomalies"></label>
+                            </div>
+                        </label>
+                        <small>Alert on unusual spending patterns</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Slack Notifications</h3>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Enable Slack Notifications</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableSlack">
+                                <label for="enableSlack"></label>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Slack Webhook URL</label>
+                        <input type="text" id="slackWebhook" class="form-input" placeholder="https://hooks.slack.com/services/..." disabled>
+                        <small>Get your webhook URL from Slack App settings</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Slack Channel</label>
+                        <input type="text" id="slackChannel" class="form-input" placeholder="#alerts" disabled>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Webhook Notifications</h3>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Enable Webhooks</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enableWebhooks">
+                                <label for="enableWebhooks"></label>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>Webhook URL</label>
+                        <input type="url" id="webhookUrl" class="form-input" placeholder="https://example.com/webhooks/alerts" disabled>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button id="saveNotifBtn" class="action-button primary">
+                        <i class="fas fa-check"></i> Save Preferences
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== SECURITY SECTION ===== -->
+            <section id="security" class="settings-section">
+                <h2 class="section-title">Security Settings</h2>
+                <p class="section-description">Manage security settings and access control</p>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Authentication</h3>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Two-Factor Authentication (2FA)</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="enable2FA">
+                                <label for="enable2FA"></label>
+                            </div>
+                        </label>
+                        <small>Require 2FA for all admin users</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Session Timeout (minutes)</label>
+                        <input type="number" id="sessionTimeout" class="form-input" value="30" min="5" max="480">
+                        <small>Automatically logout after inactivity</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">API Access Control</h3>
+                    <div class="form-group">
+                        <label>API Rate Limit</label>
+                        <input type="number" id="rateLimit" class="form-input" value="100" placeholder="requests per minute">
+                        <small>Maximum API requests per minute</small>
+                    </div>
+                    <div class="form-group">
+                        <label>IP Whitelist (Optional)</label>
+                        <textarea id="ipWhitelist" class="form-input" placeholder="Enter IPs, one per line" style="height: 120px; font-family: monospace;"></textarea>
+                        <small>Leave empty to allow all IPs</small>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Data Security</h3>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Require HTTPS Only</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="httpsOnly" checked>
+                                <label for="httpsOnly"></label>
+                            </div>
+                        </label>
+                        <small>Reject non-HTTPS connections</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="label-with-toggle">
+                            <span>Data Encryption at Rest</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="encryptAtRest" checked disabled>
+                                <label for="encryptAtRest"></label>
+                            </div>
+                        </label>
+                        <small>Always enabled for security</small>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button id="saveSecurityBtn" class="action-button primary">
+                        <i class="fas fa-check"></i> Save Settings
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== TEAM MEMBERS SECTION ===== -->
+            <section id="team-members" class="settings-section">
+                <h2 class="section-title">Team Members</h2>
+                <p class="section-description">Manage team members and their access permissions</p>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="form-section-title" style="margin: 0;">Team Members</h3>
+                    <button id="inviteMemberBtn" class="action-button primary">
+                        <i class="fas fa-user-plus"></i> Invite Member
+                    </button>
+                </div>
+
+                <div id="teamMembersContainer">
+                    <div class="team-member-item">
+                        <div class="member-info">
+                            <div class="member-name">Admin User</div>
+                            <div class="member-email">admin@example.com</div>
+                            <div class="member-role">Admin</div>
+                        </div>
+                        <div style="color: #6b7280;">Owner</div>
+                    </div>
+                </div>
+
+                <div class="form-section" style="margin-top: 30px;">
+                    <h3 class="form-section-title">Pending Invitations</h3>
+                    <div id="pendingInvitesContainer">
+                        <p style="text-align: center; color: #6b7280;">No pending invitations</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== INTEGRATIONS SECTION ===== -->
+            <section id="integrations" class="settings-section">
+                <h2 class="section-title">Integrations</h2>
+                <p class="section-description">Connect external services and platforms</p>
+
+                <div class="integration-card">
+                    <div class="integration-info">
+                        <h4><i class="fab fa-slack"></i> Slack</h4>
+                        <p>Send cost alerts to Slack channels</p>
+                    </div>
+                    <button id="connectSlackBtn" class="action-button">
+                        <i class="fas fa-link"></i> Connect
+                    </button>
+                </div>
+
+                <div class="integration-card">
+                    <div class="integration-info">
+                        <h4><i class="fas fa-webhook"></i> Webhooks</h4>
+                        <p>Receive real-time events via webhooks</p>
+                    </div>
+                    <button id="configureWebhooksBtn" class="action-button">
+                        <i class="fas fa-cog"></i> Configure
+                    </button>
+                </div>
+
+                <div class="integration-card">
+                    <div class="integration-info">
+                        <h4><i class="fas fa-cloud"></i> AWS</h4>
+                        <p>Connect to AWS for cost optimization</p>
+                    </div>
+                    <button id="connectAwsBtn" class="action-button">
+                        <i class="fas fa-link"></i> Connect
+                    </button>
+                </div>
+
+                <div class="integration-card">
+                    <div class="integration-info">
+                        <h4><i class="fas fa-envelope"></i> Email</h4>
+                        <p>Configure SMTP for email notifications</p>
+                    </div>
+                    <button id="configureEmailBtn" class="action-button">
+                        <i class="fas fa-cog"></i> Configure
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== BILLING SECTION ===== -->
+            <section id="billing" class="settings-section">
+                <h2 class="section-title">Billing & Subscription</h2>
+                <p class="section-description">Manage your subscription and billing information</p>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Current Subscription</h3>
+                    <table class="subscription-table">
+                        <tr>
+                            <td style="font-weight: 600;">Plan</td>
+                            <td>Professional</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">Status</td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">Billing Cycle</td>
+                            <td>Monthly ($99/month)</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">Next Billing Date</td>
+                            <td>December 1, 2025</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">Teams Allowed</td>
+                            <td>Unlimited</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 600;">API Calls</td>
+                            <td>1,000,000/month</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Billing Method</h3>
+                    <div class="form-group">
+                        <label>Payment Method</label>
+                        <div style="padding: 12px; background: #f9fafb; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-credit-card"></i> Visa ending in 4242</span>
+                            <button class="action-button secondary" style="padding: 6px 12px; font-size: 0.85rem;">Update</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Usage & Limits</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 8px;">API Calls This Month</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">342,156 / 1,000,000</div>
+                            <div style="background: #e5e7eb; height: 4px; border-radius: 2px; margin-top: 8px;">
+                                <div style="background: #10b981; height: 100%; width: 34.2%; border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #6b7280; margin-bottom: 8px;">Data Storage</div>
+                            <div style="font-size: 1.5rem; font-weight: 700;">2.4 GB / 100 GB</div>
+                            <div style="background: #e5e7eb; height: 4px; border-radius: 2px; margin-top: 8px;">
+                                <div style="background: #3b82f6; height: 100%; width: 2.4%; border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button class="action-button">
+                        <i class="fas fa-download"></i> Download Invoice
+                    </button>
+                    <button class="action-button secondary">
+                        <i class="fas fa-file"></i> View All Invoices
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== API KEYS SECTION ===== -->
+            <section id="api-keys" class="settings-section">
+                <h2 class="section-title">API Keys</h2>
+                <p class="section-description">Manage API keys for programmatic access</p>
+
+                <div style="margin-bottom: 20px;">
+                    <button id="createApiKeyBtn" class="action-button primary">
+                        <i class="fas fa-plus"></i> Create API Key
+                    </button>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">Active Keys</h3>
+                    <div id="apiKeysContainer">
+                        <p style="text-align: center; color: #6b7280;">No API keys created yet</p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-section-title">API Documentation</h3>
+                    <p style="margin-bottom: 12px;">Learn how to use our API:</p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 8px;">
+                            <a href="#" style="color: #3b82f6; text-decoration: none;">
+                                <i class="fas fa-book"></i> API Documentation
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 8px;">
+                            <a href="#" style="color: #3b82f6; text-decoration: none;">
+                                <i class="fas fa-code"></i> Code Examples
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" style="color: #3b82f6; text-decoration: none;">
+                                <i class="fas fa-graduation-cap"></i> API Tutorial
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Modals Container -->
+    <div id="modalsContainer"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/websocket.js"></script>
+    <script>
+        // Settings page navigation
+        document.querySelectorAll('.settings-nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                
+                // Update active nav
+                document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update active section
+                document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // Disable/enable webhook fields
+        document.getElementById('enableWebhooks').addEventListener('change', function() {
+            document.getElementById('webhookUrl').disabled = !this.checked;
+        });
+
+        // Disable/enable Slack fields
+        document.getElementById('enableSlack').addEventListener('change', function() {
+            document.getElementById('slackWebhook').disabled = !this.checked;
+            document.getElementById('slackChannel').disabled = !this.checked;
+        });
+
+        // Disable/enable scheduled export fields
+        document.getElementById('enableScheduledExport').addEventListener('change', function() {
+            document.getElementById('exportFrequency').disabled = !this.checked;
+            document.getElementById('exportEmail').disabled = !this.checked;
+        });
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `notification notification-${type} show`;
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Form submission handlers
+        document.getElementById('saveOrgBtn')?.addEventListener('click', () => {
+            showToast('Organization settings saved successfully', 'success');
+        });
+
+        document.getElementById('saveNotifBtn')?.addEventListener('click', () => {
+            showToast('Notification preferences updated', 'success');
+        });
+
+        document.getElementById('saveSecurityBtn')?.addEventListener('click', () => {
+            showToast('Security settings saved', 'success');
+        });
+    </script>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

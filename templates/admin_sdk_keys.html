@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>SDK Keys - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+    <nav class="admin-navbar">
+        <div class="container">
+            <div class="navbar-brand">SDK Keys</div>
+            <div class="navbar-menu">
+                <span class="admin-email">{{ admin_email }}</span>
+                <a href="/admin/dashboard" class="nav-link">Back to dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding:24px;">
+        <h2>API Keys</h2>
+        <p>Create, copy, and revoke SDK API keys for your account. Keys are shown only once at creation.
+        Keep them secure.</p>
+
+        <div style="margin-top:16px;margin-bottom:24px;">
+            <form id="createKeyForm" action="/api/generate-key" method="post">
+                <input type="hidden" name="email" value="{{ admin_email }}" />
+                <button type="submit" class="action-button primary">Generate New API Key</button>
+            </form>
+        </div>
+
+        <div id="createdKey" style="display:none;margin-bottom:16px;">
+            <label>New API Key (copy now, it will not be shown again)</label>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+                <input id="newKeyInput" class="form-input" readonly style="flex:1;" />
+                <button id="copyKeyBtn" class="mini-button">Copy</button>
+            </div>
+        </div>
+
+        <h3 style="margin-top:24px">Existing Keys</h3>
+        <table class="leads-table" style="width:100%;margin-top:8px;">
+            <thead>
+                <tr><th>Prefix</th><th>Created</th><th>Last Used</th><th>Active</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="keysTable">
+                {% for key in keys %}
+                <tr data-prefix="{{ key.key_prefix }}">
+                    <td>{{ key.key_prefix }}</td>
+                    <td>{{ key.created_at[:19] if key.created_at else '-' }}</td>
+                    <td>{{ key.last_used[:19] if key.last_used else '-' }}</td>
+                    <td>{{ 'Yes' if key.is_active else 'No' }}</td>
+                    <td>
+                        {% if key.is_active %}
+                        <button class="mini-button revokeBtn">Revoke</button>
+                        {% else %}
+                        <span class="badge badge-gray">Revoked</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+    // Handle form response for key creation using fetch so we can display the secret returned
+    const createForm = document.getElementById('createKeyForm');
+    const createdKeyDiv = document.getElementById('createdKey');
+    const newKeyInput = document.getElementById('newKeyInput');
+    const copyKeyBtn = document.getElementById('copyKeyBtn');
+
+    createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(createForm);
+        try {
+            const res = await fetch(createForm.action, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if(data.success && data.api_key){
+                // show the key for one-time copy
+                newKeyInput.value = data.api_key;
+                createdKeyDiv.style.display = 'block';
+                // add new row to table
+                const tbody = document.getElementById('keysTable');
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-prefix', data.key_prefix);
+                tr.innerHTML = `<td>${data.key_prefix}</td><td>Just now</td><td>-</td><td>Yes</td><td><button class="mini-button revokeBtn">Revoke</button></td>`;
+                tbody.insertBefore(tr, tbody.firstChild);
+            } else {
+                alert(data.error || 'Failed to create key');
+            }
+        } catch(err){
+            alert('Key creation failed: ' + err.message);
+        }
+    });
+
+    copyKeyBtn.addEventListener('click', () => {
+        if(newKeyInput.value){
+            navigator.clipboard.writeText(newKeyInput.value);
+            alert('API key copied to clipboard');
+        }
+    });
+
+    // Revoke buttons
+    document.getElementById('keysTable').addEventListener('click', async (e) => {
+        if(e.target && e.target.classList.contains('revokeBtn')){
+            const tr = e.target.closest('tr');
+            const prefix = tr.getAttribute('data-prefix');
+            if(!confirm('Revoke key ' + prefix + '?')) return;
+
+            const form = new FormData();
+            form.append('key_prefix', prefix);
+
+            try{
+                const res = await fetch('/api/revoke-key', { method: 'POST', body: form });
+                const data = await res.json();
+                if(data.success){
+                    // update UI
+                    tr.querySelector('td:nth-child(4)').textContent = 'No';
+                    e.target.remove();
+                    const badge = document.createElement('span');
+                    badge.className = 'badge badge-gray';
+                    badge.textContent = 'Revoked';
+                    tr.querySelector('td:nth-child(5)').appendChild(badge);
+                } else {
+                    alert(data.error || 'Failed to revoke');
+                }
+            } catch(err){
+                alert('Revoke failed: ' + err.message);
+            }
+        }
+    });
+    </script>
+</body>
+</html>

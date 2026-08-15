@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Substacker{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/admin.css">
+{% endblock %}
+
+{% block content %}
+
+    <!-- Navigation Bar -->
+    <nav class="admin-navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>Admin Dashboard</span>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-search">
+                    <input type="text" id="globalSearch" class="search-input-navbar" placeholder="Quick search...">
+                </div>
+                <div class="navbar-user">
+                    <span class="admin-email" id="adminEmail">{{ admin_email }}</span>
+                    <button id="logoutBtn" class="logout-button">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" data-section="overview">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="menu-item" data-section="teams">
+                    <i class="fas fa-users"></i>
+                    <span>Teams</span>
+                </a>
+                <a href="#" class="menu-item" data-section="budgets">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Budgets</span>
+                </a>
+                <a href="#" class="menu-item" data-section="alerts">
+                    <i class="fas fa-bell"></i>
+                    <span>Alerts</span>
+                </a>
+                <a href="#" class="menu-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="admin-content">
+
+            <!-- ===== OVERVIEW SECTION ===== -->
+            <section id="overview" class="admin-section active">
+                <div class="section-header">
+                    <div>
+                        <h1>Dashboard Overview</h1>
+                        <p class="section-subtitle">Real-time cost intelligence and team analytics</p>
+                    </div>
+                    <div class="header-actions">
+                        <button id="refreshBtn" class="action-button" title="Refresh data">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <div class="date-range-picker">
+                            <select id="dateRangeSelect" class="date-range-select">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="custom">Custom range</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Section -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon blue">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-label">Total Organization Cost</div>
+                            <div class="kpi-value" id="totalOrgCost">$0.00</div>
+                            <div class="kpi-change">
+                                <i class="fas fa-arrow-up"></i>
+                                <span id="costChange">+0%</span> vs last period
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon green">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-label">Active Teams</div>
+                            <div class="kpi-value" id="activeTeams">0</div>
+                            <div class="kpi-change">
+                                <span id="teamChange">0 new this period</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon orange">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-label">Active Alerts</div>
+                            <div class="kpi-value" id="activeAlerts">0</div>
+                            <div class="kpi-change">
+                                <span id="alertsStatus">All systems normal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon purple">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-label">Cost Growth Rate</div>
+                            <div class="kpi-value" id="growthRate">0%</div>
+                            <div class="kpi-change">
+                                <span id="growthTrend">Month-on-month</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Cost Trends (30 Days)</h3>
+                            <div class="chart-controls">
+                                <button class="chart-button" data-chart-type="line">Line</button>
+                                <button class="chart-button" data-chart-type="bar">Bar</button>
+                            </div>
+                        </div>
+                        <canvas id="costTrendChart" height="300"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Team Cost Distribution</h3>
+                        </div>
+                        <canvas id="teamDistributionChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Teams Table -->
+                <div class="table-section">
+                    <div class="section-header">
+                        <h3>Top Teams by Cost</h3>
+                        <div class="table-actions">
+                            <input type="text" id="teamsSearch" class="search-input" placeholder="Filter teams...">
+                            <button id="exportTeamsBtn" class="action-button">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Total Cost</th>
+                                    <th>Budget</th>
+                                    <th>Utilization</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topTeamsBody">
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading teams...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== TEAMS SECTION ===== -->
+            <section id="teams" class="admin-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Team Management</h1>
+                        <p class="section-subtitle">Manage teams, budgets, and access permissions</p>
+                    </div>
+                    <button id="createTeamBtn" class="action-button primary">
+                        <i class="fas fa-plus"></i> Create Team
+                    </button>
+                </div>
+
+                <!-- Teams Filters -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <input type="text" id="teamFilterInput" class="search-input" placeholder="Search teams...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="teamStatusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button id="clearFiltersBtn" class="action-button secondary">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Teams Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Team Name</th>
+                                <th>Members</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Monthly Cost</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading teams...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="pagination-button" id="prevPageBtn" disabled>← Previous</button>
+                    <span class="pagination-info" id="paginationInfo">Page 1 of 1</span>
+                    <button class="pagination-button" id="nextPageBtn" disabled>Next →</button>
+                </div>
+            </section>
+
+            <!-- ===== BUDGETS SECTION ===== -->
+            <section id="budgets" class="admin-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Budget Management</h1>
+                        <p class="section-subtitle">Set and monitor team budgets</p>
+                    </div>
+                    <button id="createBudgetBtn" class="action-button primary">
+                        <i class="fas fa-plus"></i> New Budget
+                    </button>
+                </div>
+
+                <!-- Budget Filters -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <select id="budgetTeamFilter" class="filter-select">
+                            <option value="">All Teams</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="budgetStatusFilter" class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="on-track">On Track</option>
+                            <option value="warning">Warning</option>
+                            <option value="exceeded">Exceeded</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Budgets Grid -->
+                <div class="budgets-grid" id="budgetsGrid">
+                    <div class="text-center" style="grid-column: 1/-1; padding: 40px;">
+                        Loading budgets...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== ALERTS SECTION ===== -->
+            <section id="alerts" class="admin-section">
+                <div class="section-header">
+                    <div>
+                        <h1>Alerts & Anomalies</h1>
+                        <p class="section-subtitle">Monitor cost anomalies and threshold violations</p>
+                    </div>
+                    <div class="header-actions">
+                        <button id="configureAlertsBtn" class="action-button">
+                            <i class="fas fa-sliders-h"></i> Configure
+                        </button>
+                        <button id="clearAllAlertsBtn" class="action-button secondary">
+                            <i class="fas fa-times"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alert Filters -->
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <select id="alertTypeFilter" class="filter-select">
+                            <option value="">All Types</option>
+                            <option value="budget-exceeded">Budget Exceeded</option>
+                            <option value="anomaly">Anomaly Detected</option>
+                            <option value="threshold">Threshold Violation</option>
+                            <option value="optimization">Optimization Opportunity</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="alertSeverityFilter" class="filter-select">
+                            <option value="">All Severity</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Alerts Container -->
+                <div class="alerts-container" id="alertsContainer">
+                    <div class="text-center" style="padding: 40px;">
+                        Loading alerts...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SETTINGS SECTION ===== -->
+            <section id="settings" class="admin-section">
+                <div class="section-header">
+                    <h1>Settings & Configuration</h1>
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Organization Settings -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Organization Settings</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label>Organization Name</label>
+                                <input type="text" id="orgName" class="form-input" placeholder="Your organization">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="orgEmail" class="form-input" placeholder="admin@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Billing Contact</label>
+                                <input type="email" id="billingEmail" class="form-input" placeholder="billing@example.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Settings -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Notification Preferences</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="label-with-toggle">
+                                    <span>Email Alerts</span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="emailAlerts" checked>
+                                        <label for="emailAlerts"></label>
+                                    </div>
+                                </label>
+                                <small>Receive email notifications for anomalies</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-with-toggle">
+                                    <span>Daily Summary</span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="dailySummary" checked>
+                                        <label for="dailySummary"></label>
+                                    </div>
+                                </label>
+                                <small>Get daily cost summary at 9 AM</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="label-with-toggle">
+                                    <span>Slack Notifications</span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="slackNotif">
+                                        <label for="slackNotif"></label>
+                                    </div>
+                                </label>
+                                <small>Post alerts to Slack channel</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Slack Webhook URL</label>
+                                <input type="text" id="slackWebhook" class="form-input" placeholder="https://hooks.slack.com/...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3>Security & Access</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label class="label-with-toggle">
+                                    <span>Two-Factor Authentication</span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="twoFactorAuth">
+                                        <label for="twoFactorAuth"></label>
+                                    </div>
+                                </label>
+                                <small>Require 2FA for admin access</small>
+                            </div>
+                            <div class="form-group">
+                                <label>API Rate Limit</label>
+                                <input type="number" id="rateLimit" class="form-input" value="100" placeholder="requests per minute">
+                            </div>
+                            <div class="form-group">
+                                <label>API Keys</label>
+                                <button class="form-button">
+                                    <i class="fas fa-key"></i> Manage API Keys
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="settings-card danger">
+                        <div class="card-header">
+                            <h3>Danger Zone</h3>
+                        </div>
+                        <div class="settings-form">
+                            <div class="form-group">
+                                <label>Reset Organization</label>
+                                <button class="form-button danger-button">
+                                    <i class="fas fa-exclamation"></i> Reset All Data
+                                </button>
+                                <small>This action cannot be undone</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save/Reset Actions -->
+                <div class="settings-actions">
+                    <button id="saveSettingsBtn" class="action-button primary">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                    <button id="resetSettingsBtn" class="action-button secondary">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalsContainer"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="/static/js/websocket.js"></script>
+    <script src="/static/js/admin.js"></script>
+{% endblock %}
