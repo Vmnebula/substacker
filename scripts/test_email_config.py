@@ -154,7 +154,7 @@ if smtp_user and smtp_pass:
             print(f"   Update Railway variables:")
             print(f"   SMTP_HOST=smtp.gmail.com")
             print(f"   SMTP_PORT=587")
-            print(f"   SMTP_USER=your-gmail@gmail.com")
+            print(f"   SMTP_USER=your-email@example.com")
             print(f"   SMTP_PASS=your-app-password")
         except Exception as e:
             print(f"❌ Connection error: {type(e).__name__}: {e}")
