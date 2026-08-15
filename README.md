@@ -10,6 +10,12 @@
 
 ---
 
+## 🎬 Product Demo
+
+![Substacker Demo](docs/assets/demo.gif)
+
+---
+
 ## 🏛️ System Architecture
 
 ```mermaid
@@ -39,6 +45,26 @@ graph TD
 - ⚡ **Real-Time Observability:** WebSockets push live token throughput and financial burn directly to an analytics dashboard.
 - 🛡️ **Budget Enforcement & Anomaly Detection:** Real-time velocity monitoring flags runaway agent loops and spikes before bills explode.
 - 🗄️ **Dual Database Layer:** Seamlessly switches between local zero-config SQLite and scalable cloud Supabase (PostgreSQL).
+
+---
+
+## 📁 Repository Structure
+
+```
+├── app.py                      # FastAPI core application & API gateway
+├── analyzer_multi_provider.py  # Multi-provider cost engine wrapper
+├── analyzer_v2.py              # Decimal-precision token & pricing math
+├── anomaly_detector.py         # Anomaly detection for token burn spikes
+├── budget_enforcer.py          # Real-time team budget limits & policies
+├── websocket_manager.py        # Real-time WebSocket connection manager
+├── substacker_sdk/             # Python client library for applications
+├── docs/                       # Architecture diagrams, specifications, assets
+│   ├── architecture/           # Data flows and network diagrams
+│   └── assets/                 # Product demo GIF & UI illustrations
+├── sample_data/                # Sample CSV datasets for testing imports
+├── tests/                      # Pytest automated test suite
+└── templates/                  # Frontend UI templates
+```
 
 ---
 
@@ -103,7 +129,7 @@ Track LLM invocations in your own applications:
 from substacker_sdk import SubstackerClient
 
 client = SubstackerClient(
-    api_key="sk_substacker_your_key",
+    api_key="***",
     endpoint="http://localhost:8000"
 )
 
