@@ -10,7 +10,7 @@
 │   Your User      │                              │  Railway Server  │
 │                  │  1. POST /capture-lead       │  Singapore       │
 │ substacker.      │─────────────────────────────>│                  │
-│ nayacloud.com    │                              │  Port 8000       │
+│ vmnebula.com    │                              │  Port 8000       │
 └──────────────────┘                              └────────┬─────────┘
                                                            │
                                                            │ 2. Try SMTP
@@ -27,13 +27,13 @@
                                                            │ ❌ TIMEOUT
                                                            ▼
                                               ┌─────────────────────────┐
-                                              │  mail.nayacloud.com:587 │
+                                              │  smtp.example.com:587 │
                                               │  (Never reaches)        │
                                               └─────────────────────────┘
 
 ERROR in logs:
 ERROR:email_service:❌ SMTP connection timeout: timed out
-ERROR:email_service: Unable to reach mail.nayacloud.com:587
+ERROR:email_service: Unable to reach smtp.example.com:587
 
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -44,7 +44,7 @@ ERROR:email_service: Unable to reach mail.nayacloud.com:587
 │   Your User      │                              │  Railway Server  │
 │                  │  1. POST /capture-lead       │  Singapore       │
 │ substacker.      │─────────────────────────────>│                  │
-│ nayacloud.com    │                              │  Port 8000       │
+│ vmnebula.com    │                              │  Port 8000       │
 └──────────────────┘                              └────────┬─────────┘
                                                            │
                                                            │ 2. SMTP to
@@ -84,7 +84,7 @@ Outbound SMTP Port 587:
    • smtp.office365.com (Microsoft)
 
 ❌ BLOCKED (Not Whitelisted):
-   • mail.nayacloud.com
+   • smtp.example.com
    • mail.yourdomain.com
    • smtp.privatedomain.com
    • Any private SMTP server
@@ -97,7 +97,7 @@ REASON: Spam prevention and security
 ═══════════════════════════════════════════════════════════════════════════════
 
 Test 1: DNS Resolution
-[1/4] Resolving mail.nayacloud.com...
+[1/4] Resolving smtp.example.com...
 ✅ Resolved to: XXX.XXX.XXX.XXX
 
 Test 2: Port Connectivity (THE CRITICAL TEST)
@@ -109,7 +109,7 @@ Test 2: Port Connectivity (THE CRITICAL TEST)
 Test 3: SMTP Connection
 [3/4] Connecting to SMTP server...
 ❌ Connection timeout: timed out
-   🚨 mail.nayacloud.com:587 is not reachable
+   🚨 smtp.example.com:587 is not reachable
    🔧 CRITICAL: Railway is blocking your SMTP server
 
 
@@ -124,7 +124,7 @@ UPDATE THESE 4 VARIABLES:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Variable Name    │ Current Value            │ New Value                    │
 ├──────────────────┼──────────────────────────┼──────────────────────────────┤
-│ SMTP_HOST        │ mail.nayacloud.com       │ smtp.gmail.com               │
+│ SMTP_HOST        │ smtp.example.com       │ smtp.gmail.com               │
 │ SMTP_PORT        │ 587                      │ 587                          │
 │ SMTP_USER        │ your-user                │ your-email@gmail.com         │
 │ SMTP_PASS        │ ********                 │ your-app-password (16 chars) │
@@ -140,9 +140,9 @@ Click "Save" → Railway auto-deploys → Wait 1-2 minutes → Test
 BEFORE (Broken):
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ INFO:httpx:HTTP Request: POST .../leads "HTTP/2 200 OK"                    │
-│ INFO:email_service:Connecting to mail.nayacloud.com:587...                 │
+│ INFO:email_service:Connecting to smtp.example.com:587...                 │
 │ ERROR:email_service:❌ SMTP connection timeout: timed out                  │
-│ ERROR:email_service: Unable to reach mail.nayacloud.com:587                │
+│ ERROR:email_service: Unable to reach smtp.example.com:587                │
 │ WARNING:email_service: Skipping admin notification (non-critical)          │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -195,7 +195,7 @@ Total time to fix: ~5 minutes
 💡 WHY THIS WORKS
 ═══════════════════════════════════════════════════════════════════════════════
 
-Private SMTP (mail.nayacloud.com):
+Private SMTP (smtp.example.com):
    ❌ Not whitelisted by Railway
    ❌ Requires firewall configuration
    ❌ Dynamic IP ranges needed

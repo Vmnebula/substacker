@@ -7,11 +7,11 @@ setup(
     name="substacker-sdk",
     version="0.1.0",
     author="Substacker",
-    author_email="support@substacker.nayacloud.com",
+    author_email="support@vmnebula.com",
     description="Real-time AI cost tracking for OpenAI",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/substacker/sdk",
+    url="https://github.com/Vmnebula/substacker",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
