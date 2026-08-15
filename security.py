@@ -42,11 +42,13 @@ class SecurityConfig:
     CSRF_TOKEN_EXPIRY = 3600  # 1 hour
 
     # Secrets
-    SECRET_KEY = os.getenv('SECRET_KEY') or secrets.token_urlsafe(32)
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        raise RuntimeError("CRITICAL: SECRET_KEY environment variable is not set. Refusing to start.")
 
     @staticmethod
     def get_secret_key():
-        """Get or generate secret key"""
+        """Get validated secret key"""
         return SecurityConfig.SECRET_KEY
 
 
