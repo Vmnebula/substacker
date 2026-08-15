@@ -100,7 +100,7 @@ client_b = track_openai(OpenAI(), api_key="sk_xxx", team="project-b")
 
 - Documentation: [docs.localhost:8000](https://docs.localhost:8000)
 - Issues: [github.com/substacker/sdk/issues](https://github.com/Vmnebula/substacker/issues)
-- Email: contact@vmnebula.com
+- Email: hello@example.com
 
 ## License
 

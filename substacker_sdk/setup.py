@@ -7,7 +7,7 @@ setup(
     name="substacker-sdk",
     version="0.1.0",
     author="Substacker",
-    author_email="support@vmnebula.com",
+    author_email="support@example.com",
     description="Real-time AI cost tracking for OpenAI",
     long_description=long_description,
     long_description_content_type="text/markdown",

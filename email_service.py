@@ -110,7 +110,7 @@ class EmailService:
                 logger.error("   IMMEDIATE FIX: Update to Gmail SMTP relay:")
                 logger.error("   SMTP_HOST=smtp.gmail.com")
                 logger.error("   SMTP_PORT=587")
-                logger.error("   SMTP_USER=your-gmail@gmail.com")
+                logger.error("   SMTP_USER=your-email@example.com")
                 logger.error("   SMTP_PASS=your-app-password")
                 return False
             logger.error(f"❌ Network error: {e}")
