@@ -1,0 +1,5 @@
+templates/** linguist-documentation
+static/** linguist-vendored
+sample_data/** linguist-documentation
+docs/** linguist-documentation
+*.json linguist-generated
