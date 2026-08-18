@@ -152,7 +152,7 @@
         }
 
         .column-info .type {
-            color: #999;
+            color: #6b7280;
             font-size: 0.9em;
             font-style: italic;
         }
@@ -164,11 +164,17 @@
 
         .optional {
             background-color: #e8f5e9;
-            border-left-color: #4a7c59;
+            border-left-color: #3d6849;
         }
 
         .optional .name {
-            color: #4a7c59;
+            color: #3d6849;
+        }
+
+        /* The mint panel is lighter than white-adjacent greys expect: #6b7280 falls to
+           4.29:1 against it, so the muted type label needs a darker shade here. */
+        .optional .type {
+            color: #5f6b63;
         }
 
         table {
@@ -264,7 +270,7 @@
 
         .btn-secondary:hover {
             background: #eee;
-            border-color: #999;
+            border-color: #6b7280;
         }
 
         .tips-box {
@@ -617,19 +623,19 @@
                 <h2>📝 Example CSV Format</h2>
                 
                 <h3>Minimal Format (with auto-team mapping)</h3>
-                <div class="example-code">model,prompt_tokens,completion_tokens,api_key
+                <div class="example-code" tabindex="0" role="region" aria-label="Example, scrollable">model,prompt_tokens,completion_tokens,api_key
 gpt-4,150,250,sk_prod_123
 gpt-3.5-turbo,50,100,sk_prod_456
 claude-3-opus,200,300,sk_prod_123</div>
 
                 <h3>With Team Column</h3>
-                <div class="example-code">model,prompt_tokens,completion_tokens,team
+                <div class="example-code" tabindex="0" role="region" aria-label="Example, scrollable">model,prompt_tokens,completion_tokens,team
 gpt-4,150,250,marketing
 gpt-3.5-turbo,50,100,engineering
 claude-3-opus,200,300,data_science</div>
 
                 <h3>From Email Domain</h3>
-                <div class="example-code">model,prompt_tokens,completion_tokens,user_email
+                <div class="example-code" tabindex="0" role="region" aria-label="Example, scrollable">model,prompt_tokens,completion_tokens,user_email
 gpt-4,150,250,john@marketing.example.com
 gpt-3.5-turbo,50,100,jane@engineering.example.com
 gemini-pro,75,150,bob@datascience.example.com</div>
@@ -724,7 +730,7 @@ gemini-pro,75,150,bob@datascience.example.com</div>
 
         <div class="footer">
             <p>Questions? <a href="mailto:support@example.com" class="back-link">Contact Support</a></p>
-            <p style="font-size: 0.9em; color: #999;">Max file: 10MB | Max rows: 100,000 | Supported formats: CSV, JSON</p>
+            <p style="font-size: 0.9em; color: #6b7280;">Max file: 10MB | Max rows: 100,000 | Supported formats: CSV, JSON</p>
         </div>
     </div>
 

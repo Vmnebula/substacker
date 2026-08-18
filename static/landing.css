@@ -7,7 +7,11 @@
     /* Accent Color - Modern Blue */
     --accent: #3b82f6;
     --accent-dark: #2563eb;
+    --accent-darker: #1d4ed8;
     --accent-light: #60a5fa;
+    /* For accent-coloured text and small elements on light backgrounds. --accent
+       itself is 3.1:1 on white and fails WCAG AA for body text. */
+    --accent-on-light: #1d4ed8;
     
     /* Functional Colors */
     --danger: #ef4444;
@@ -129,7 +133,8 @@ body {
 }
 
 .navbar-menu a.nav-cta {
-    background: var(--accent);
+    /* --accent is only 3.67:1 behind white text. --accent-dark reaches 5.17:1. */
+    background: var(--accent-dark);
     color: var(--white);
     padding: 8px 20px;
     border-radius: 8px;
@@ -137,7 +142,7 @@ body {
 }
 
 .navbar-menu a.nav-cta:hover {
-    background: var(--accent-dark);
+    background: var(--accent-darker);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
 }
@@ -1122,7 +1127,8 @@ footer {
 }
 
 .footer-tagline {
-    color: var(--gray-500);
+    /* --gray-500 is 3.75:1 on the dark footer; --gray-400 reaches 6.96:1. */
+    color: var(--gray-400);
     font-size: 0.875rem;
 }
 

@@ -145,3 +145,50 @@ def test_social_preview_uses_absolute_urls(browser, server):
     ctx.close()
     assert image and image.startswith("http"), f"og:image is not absolute: {image!r}"
     assert url and url.startswith("http"), f"og:url is not absolute: {url!r}"
+
+
+AXE_URL = "https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js"
+
+
+@pytest.fixture(scope="module")
+def axe_source():
+    """axe-core is fetched once; skip rather than fail when offline."""
+    import urllib.error
+    import urllib.request
+
+    try:
+        return urllib.request.urlopen(AXE_URL, timeout=60).read().decode()
+    except (urllib.error.URLError, TimeoutError) as exc:
+        pytest.skip(f"axe-core unavailable: {exc}")
+
+
+@pytest.mark.parametrize("path", PUBLIC_PAGES)
+@pytest.mark.parametrize("viewport", [DESKTOP, MOBILE], ids=["desktop", "mobile"])
+def test_wcag_21_aa(browser, server, axe_source, path, viewport):
+    """No WCAG 2.1 A or AA violations on any public page, at either width.
+
+    The site previously had 33 contrast failures and several scrollable regions that
+    could not be reached from the keyboard.
+    """
+    ctx, page, _ = _load(browser, server, path, viewport)
+    page.add_script_tag(content=axe_source)
+    violations = page.evaluate(
+        """async () => {
+            const r = await axe.run(document, {
+                runOnly: {type: 'tag', values: ['wcag2a','wcag2aa','wcag21a','wcag21aa']}
+            });
+            return r.violations.map(v => ({
+                id: v.id,
+                impact: v.impact,
+                count: v.nodes.length,
+                sample: (v.nodes[0] || {}).html
+            }));
+        }"""
+    )
+    ctx.close()
+
+    if violations:
+        detail = "\n".join(
+            f"  {v['id']} ({v['impact']}) x{v['count']}: {v['sample']}" for v in violations
+        )
+        pytest.fail(f"{path} has accessibility violations:\n{detail}")

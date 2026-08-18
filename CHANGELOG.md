@@ -30,8 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   554 KB respectively, with a 37 KB poster frame that paints immediately. The
   animation now respects `prefers-reduced-motion`.
 - Browser-level tests, run as their own CI job, assert that no page overflows a phone
-  viewport, that no page triggers a CSP violation, and that the hero and social assets
-  are actually served.
+  viewport, that no page triggers a CSP violation, that the hero and social assets are
+  actually served, and that axe-core reports no WCAG 2.1 A or AA violations on any
+  public page at either desktop or phone width.
 - A real 1200x630 Open Graph card, plus `og:url`, `og:type`, `og:site_name`, image
   dimensions, alt text, Twitter card tags and a canonical link.
 - Removed 2,861 lines of unreferenced CSS and JavaScript: a duplicate `admin.js` that
@@ -53,6 +54,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which was permitted for styles but not scripts.
 - `og:image` referenced a file that was never created and used a relative path, which
   scrapers ignore. Link previews therefore rendered without an image anywhere.
+- 33 WCAG 2.1 AA colour contrast failures across six pages, ranging from 1.79:1 to
+  4.32:1 against a 4.5:1 requirement. The worst were the analyzer's gold button text
+  and the muted greys used for secondary labels. Fixes reuse existing design tokens
+  where they exist and add `--accent-on-light` and `--accent-text` for the cases where
+  a brand colour is legible as a fill but not as text.
+- Scrollable code samples, tables and the live update feed could not be reached with a
+  keyboard, so their content was unavailable without a pointer. The developer docs also
+  wrapped tables twice, once in the markup and again at runtime, nesting a second
+  unreachable scroll box inside the first.
 
 ### Added
 

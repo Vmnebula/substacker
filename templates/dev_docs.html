@@ -78,8 +78,8 @@
             font-size: 0.85em;
             margin-right: 10px;
         }
-        .method.post { background: #10b981; color: white; }
-        .method.get { background: #3b82f6; color: white; }
+        .method.post { background: #047857; color: white; }
+        .method.get { background: #2563eb; color: white; }
         .method.patch { background: #f59e0b; color: white; }
         .method.delete { background: #ef4444; color: white; }
         pre {
@@ -111,6 +111,25 @@
 
         /* A table with several columns cannot shrink to phone width. Give it its own
            horizontal scroll area so the document itself never scrolls sideways. */
+        /* atom-one-dark renders comments at #5c6370, which is 2.31:1 against its own
+           #282c34 background, and interpolated substitutions at 4.38:1. Both fail AA,
+           so lift them here rather than swapping the whole theme. */
+        /* highlight.js applies overflow-x to .hljs, making <code> the scrollable box.
+           The <pre> already scrolls and is focusable, so hand scrolling back to it and
+           avoid a second, keyboard-unreachable scroll region. */
+        pre code.hljs {
+            overflow-x: visible;
+        }
+
+        .hljs-comment,
+        .hljs-quote {
+            color: #8b949e;
+        }
+
+        .hljs-subst {
+            color: #e8848c;
+        }
+
         .table-scroll {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -286,10 +305,10 @@
                 <h2><i class="fas fa-cube"></i> SDK Integration (Python)</h2>
                 
                 <h3>Installation</h3>
-                <pre><code class="language-bash">pip install substacker-sdk</code></pre>
+                <pre tabindex="0"><code class="language-bash">pip install substacker-sdk</code></pre>
 
                 <h3>Basic Usage</h3>
-                <pre><code class="language-python">from openai import OpenAI
+                <pre tabindex="0"><code class="language-python">from openai import OpenAI
 from substacker import track_openai
 
 # Initialize OpenAI client
@@ -315,7 +334,7 @@ print(response.choices[0].message.content)
 # Tracking sent silently in background</code></pre>
 
                 <h3>Advanced Configuration</h3>
-                <pre><code class="language-python">from openai import OpenAI
+                <pre tabindex="0"><code class="language-python">from openai import OpenAI
 from substacker import track_openai
 
 openai = track_openai(
@@ -336,7 +355,7 @@ openai = track_openai(
 
                 <h3>Authentication</h3>
                 <p>All API requests require the <code>X-API-Key</code> header:</p>
-                <pre><code class="language-bash">curl http://localhost:8000/api/track \
+                <pre tabindex="0"><code class="language-bash">curl http://localhost:8000/api/track \
   -H "X-API-Key: sk_substacker_xxxx" \
   -H "Content-Type: application/json" \
   -d '{...}'</code></pre>
@@ -349,7 +368,7 @@ openai = track_openai(
                 <p>Log an API call to Substacker.</p>
 
                 <h4>Request Body</h4>
-                <div class="table-scroll"><table>
+                <div class="table-scroll" tabindex="0" role="region" aria-label="Table, scrollable"><table>
                     <tr>
                         <th>Field</th>
                         <th>Type</th>
@@ -395,7 +414,7 @@ openai = track_openai(
                 </table></div>
 
                 <h4>Example Request</h4>
-                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/track \
+                <pre tabindex="0"><code class="language-bash">curl -X POST http://localhost:8000/api/track \
   -H "X-API-Key: sk_substacker_abc123..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -407,7 +426,7 @@ openai = track_openai(
   }'</code></pre>
 
                 <h4>Example Response (Success)</h4>
-                <pre><code class="language-json">{
+                <pre tabindex="0"><code class="language-json">{
   "status": "tracked",
   "cost": 0.0125,
   "provider": "openai",
@@ -415,7 +434,7 @@ openai = track_openai(
 }</code></pre>
 
                 <h4>Example Response (Unknown Model)</h4>
-                <pre><code class="language-json">{
+                <pre tabindex="0"><code class="language-json">{
   "status": "tracked",
   "cost": 0.0,
   "provider": "openai",
@@ -431,11 +450,11 @@ openai = track_openai(
                 <p>Fetch real-time team cost breakdown and recent usage.</p>
 
                 <h4>Example Request</h4>
-                <pre><code class="language-bash">curl -X GET http://localhost:8000/api/dashboard/realtime \
+                <pre tabindex="0"><code class="language-bash">curl -X GET http://localhost:8000/api/dashboard/realtime \
   -H "X-API-Key: sk_substacker_abc123..."</code></pre>
 
                 <h4>Example Response</h4>
-                <pre><code class="language-json">{
+                <pre tabindex="0"><code class="language-json">{
   "total_cost": 125.45,
   "today_cost": 12.30,
   "team_breakdown": {
@@ -470,12 +489,12 @@ openai = track_openai(
                 </div>
 
                 <h4>Request</h4>
-                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/generate-key \
+                <pre tabindex="0"><code class="language-bash">curl -X POST http://localhost:8000/api/generate-key \
   -H "Cookie: admin_token=..." \
   -d "email=user@example.com"</code></pre>
 
                 <h4>Response</h4>
-                <pre><code class="language-json">{
+                <pre tabindex="0"><code class="language-json">{
   "success": true,
   "api_key": "sk_substacker_abc123...",
   "key_prefix": "sk_substacker_abc"
@@ -491,12 +510,12 @@ openai = track_openai(
                 </div>
 
                 <h4>Request</h4>
-                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/revoke-key \
+                <pre tabindex="0"><code class="language-bash">curl -X POST http://localhost:8000/api/revoke-key \
   -H "Cookie: admin_token=..." \
   -d "key_prefix=sk_substacker_abc"</code></pre>
 
                 <h4>Response</h4>
-                <pre><code class="language-json">{
+                <pre tabindex="0"><code class="language-json">{
   "success": true,
   "message": "Key revoked"
 }</code></pre>
@@ -506,7 +525,7 @@ openai = track_openai(
             <div class="section">
                 <h2><i class="fas fa-exclamation-triangle"></i> Error Codes</h2>
 
-                <div class="table-scroll"><table>
+                <div class="table-scroll" tabindex="0" role="region" aria-label="Table, scrollable"><table>
                     <tr>
                         <th>Code</th>
                         <th>Meaning</th>
@@ -540,7 +559,7 @@ openai = track_openai(
                 <h2><i class="fas fa-code"></i> Code Examples</h2>
 
                 <h3>Python (with SDK)</h3>
-                <pre><code class="language-python">from openai import OpenAI
+                <pre tabindex="0"><code class="language-python">from openai import OpenAI
 from substacker import track_openai
 
 # Create tracked client
@@ -559,7 +578,7 @@ for i in range(10):
     print(f"Answer: {response.choices[0].message.content}")</code></pre>
 
                 <h3>Python (REST API)</h3>
-                <pre><code class="language-python">import requests
+                <pre tabindex="0"><code class="language-python">import requests
 
 api_key = "sk_substacker_..."
 endpoint = "http://localhost:8000/api/track"
@@ -581,7 +600,7 @@ response = requests.post(
 print(response.json())</code></pre>
 
                 <h3>Node.js (REST API)</h3>
-                <pre><code class="language-javascript">const axios = require('axios');
+                <pre tabindex="0"><code class="language-javascript">const axios = require('axios');
 
 const apiKey = 'sk_substacker_...';
 const endpoint = 'http://localhost:8000/api/track';
@@ -603,7 +622,7 @@ axios.post(endpoint, payload, {
 });</code></pre>
 
                 <h3>cURL</h3>
-                <pre><code class="language-bash">curl -X POST http://localhost:8000/api/track \
+                <pre tabindex="0"><code class="language-bash">curl -X POST http://localhost:8000/api/track \
   -H "X-API-Key: sk_substractor_..." \
   -H "Content-Type: application/json" \
   -d '{
@@ -663,12 +682,9 @@ axios.post(endpoint, payload, {
         hljs.highlightAll();
         
         // Make tables responsive
-        document.querySelectorAll('table').forEach(table => {
-            const wrapper = document.createElement('div');
-            wrapper.style.overflowX = 'auto';
-            table.parentNode.insertBefore(wrapper, table);
-            wrapper.appendChild(table);
-        });
+        // Tables are wrapped in .table-scroll in the markup, which works without
+        // JavaScript and carries the tabindex a scrollable region needs. The previous
+        // runtime wrapper added a second, keyboard-unreachable scroll box inside it.
     </script>
 </body>
 </html>

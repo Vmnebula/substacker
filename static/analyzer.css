@@ -5,6 +5,9 @@
     --primary-dark: #142d47;
     --accent-color: #d4af37;
     --accent-dark: #b8941e;
+    /* The gold reads at 2.1:1 on white, far below AA. This darker shade holds the
+       same hue at 4.9:1 and is used wherever the accent becomes text. */
+    --accent-text: #8a6d1f;
     --success-color: #4a7c59;
     --warning-color: #d97706;
     --info-color: #0369a1;
@@ -397,7 +400,7 @@
 
 .method-button.secondary {
     background: white;
-    color: var(--accent-color);
+    color: var(--accent-text);
     border: 2px solid var(--accent-color);
 }
 

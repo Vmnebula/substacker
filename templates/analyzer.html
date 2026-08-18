@@ -55,7 +55,9 @@
                         
                         <button id="tryDemo" class="method-button secondary" style="padding: 20px; font-size: 1.1em; display: flex; flex-direction: column; align-items: center; gap: 10px;">
                             <span style="font-weight: 600;">Try Demo</span>
-                            <small style="font-size: 0.85em; opacity: 0.8;">Sample data</small>
+                            <!-- No opacity here: dimming the gold caption drops it to
+                                 3.35:1 on white, below WCAG AA. -->
+                            <small style="font-size: 0.85em;">Sample data</small>
                         </button>
                     </div>
                     
@@ -128,14 +130,14 @@
                             </div>
 
                             <div class="code-block" id="pythonCode">
-                                <pre><code>pip install substacker-sdk</code></pre>
+                                <pre tabindex="0"><code>pip install substacker-sdk</code></pre>
                                 <button class="copy-btn" onclick="copyCode('pip install substacker-sdk')">
                                     📋 Copy
                                 </button>
                             </div>
 
                             <div class="code-block" id="javascriptCode" style="display: none;">
-                                <pre><code>npm install @substacker/sdk</code></pre>
+                                <pre tabindex="0"><code>npm install @substacker/sdk</code></pre>
                                 <button class="copy-btn" onclick="copyCode('npm install @substacker/sdk')">
                                     📋 Copy
                                 </button>
@@ -162,7 +164,7 @@
                             <p>Wrap your OpenAI client with our tracker. That's it!</p>
 
                             <div class="code-example" id="pythonExample">
-                                <pre><code>from openai import OpenAI
+                                <pre tabindex="0"><code>from openai import OpenAI
 from substacker import track_openai
 
 # Wrap your OpenAI client
