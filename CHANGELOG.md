@@ -38,8 +38,10 @@ First tagged release. Establishes a baseline for the existing codebase.
 - Sample data and the downloadable CSV template now use current model names, so a new
   user's first analysis produces real costs rather than zeros.
 - `DATABASE_TYPE` now selects the storage backend as documented. The application
-  previously required Supabase regardless of the setting; `sqlite` is the default and
-  needs no configuration.
+  previously required Supabase regardless of the setting, so a fresh clone could not
+  start. When the variable is unset the backend is inferred: Supabase if its
+  credentials are present, SQLite otherwise. That keeps existing deployments that never
+  set the variable on Supabase, while a fresh clone still runs with no configuration.
 - The Python SDK reports usage from a background worker instead of blocking the calling
   thread, and logs failures through the `logging` module rather than printing them.
 - The SDK is packaged with `pyproject.toml` and now installs a working, importable

@@ -167,3 +167,45 @@ def test_shipped_sample_data_is_fully_priced(analyzer, csv_name):
 
     unpriced = [m for m in sorted(models) if not analyzer._get_model_pricing(m)[1]]
     assert not unpriced, f"{csv_name} references models with no price: {unpriced}"
+
+
+class TestDatabaseBackendSelection:
+    """The backend must not silently change under an existing deployment.
+
+    Before DATABASE_TYPE was wired up, the application always used Supabase. A
+    deployment that never set the variable must therefore keep using Supabase, while a
+    fresh clone with no configuration at all must get SQLite.
+    """
+
+    @staticmethod
+    def _select(monkeypatch, **env):
+        import importlib
+
+        import app
+
+        for key in ("DATABASE_TYPE", "SUPABASE_URL", "SUPABASE_KEY"):
+            monkeypatch.delenv(key, raising=False)
+        for key, value in env.items():
+            monkeypatch.setenv(key, value)
+        return importlib.reload(app)._select_database_type()
+
+    def test_defaults_to_sqlite_with_no_configuration(self, monkeypatch):
+        assert self._select(monkeypatch) == "sqlite"
+
+    def test_infers_supabase_when_credentials_are_present(self, monkeypatch):
+        got = self._select(
+            monkeypatch, SUPABASE_URL="https://x.supabase.co", SUPABASE_KEY="k"
+        )
+        assert got == "supabase"
+
+    def test_explicit_setting_always_wins(self, monkeypatch):
+        got = self._select(
+            monkeypatch,
+            DATABASE_TYPE="sqlite",
+            SUPABASE_URL="https://x.supabase.co",
+            SUPABASE_KEY="k",
+        )
+        assert got == "sqlite"
+
+    def test_partial_supabase_credentials_do_not_trigger_inference(self, monkeypatch):
+        assert self._select(monkeypatch, SUPABASE_URL="https://x.supabase.co") == "sqlite"

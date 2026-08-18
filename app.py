@@ -49,9 +49,24 @@ app.mount("/sample_data", StaticFiles(directory="sample_data"), name="sample_dat
 templates = Jinja2Templates(directory="templates")
 
 # Initialize services
-# DATABASE_TYPE selects the storage backend. "sqlite" needs no configuration and is
-# the default for local development; "supabase" requires SUPABASE_URL and SUPABASE_KEY.
-DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").strip().lower()
+# DATABASE_TYPE selects the storage backend: "sqlite" needs no configuration, while
+# "supabase" requires SUPABASE_URL and SUPABASE_KEY.
+#
+# When DATABASE_TYPE is unset the backend is inferred, so that neither kind of
+# deployment breaks by default. An environment that already has Supabase credentials
+# keeps using Supabase; a fresh clone with no configuration gets SQLite. Set
+# DATABASE_TYPE explicitly in production rather than relying on the inference.
+def _select_database_type() -> str:
+    configured = os.getenv("DATABASE_TYPE", "").strip().lower()
+    if configured:
+        return configured
+    if os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_KEY"):
+        logger.info("DATABASE_TYPE is unset; using supabase because its credentials are present")
+        return "supabase"
+    return "sqlite"
+
+
+DATABASE_TYPE = _select_database_type()
 if DATABASE_TYPE == "supabase":
     db = SupabaseDatabase()
 elif DATABASE_TYPE == "sqlite":

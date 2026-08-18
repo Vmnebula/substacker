@@ -132,7 +132,7 @@ Copy `.env.example` to get started.
 | Variable | Default | Description |
 | --- | --- | --- |
 | `SECRET_KEY` | none | Required. Signs session cookies and tokens. Use at least 32 random characters. |
-| `DATABASE_TYPE` | `sqlite` | Storage backend. `sqlite` needs no setup; `supabase` requires the two variables below. |
+| `DATABASE_TYPE` | inferred | Storage backend, `sqlite` or `supabase`. When unset, Supabase is used if its credentials are present, otherwise SQLite. Set it explicitly in production. |
 | `SUPABASE_URL` | none | Project URL, required when `DATABASE_TYPE=supabase`. |
 | `SUPABASE_KEY` | none | Service key, required when `DATABASE_TYPE=supabase`. |
 | `BASE_URL` | `http://localhost:8000` | Public URL used in generated links and emails. |
