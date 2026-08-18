@@ -1,9 +1,9 @@
+import json
+import logging
 import os
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-import json
-from supabase import create_client, Client
-import logging
+
+from supabase import Client, create_client
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,8 @@ class SupabaseDatabase:
     def add_lead(self, 
                  email: str, 
                  source: str = 'landing_page',
-                 ip_address: Optional[str] = None,
-                 user_agent: Optional[str] = None) -> Optional[int]:
+                 ip_address: str | None = None,
+                 user_agent: str | None = None) -> int | None:
         """Add new lead or update existing"""
         try:
             # Check if lead already exists
@@ -79,7 +79,7 @@ class SupabaseDatabase:
     def log_email_event(self, 
                         email: str, 
                         event_type: str, 
-                        metadata: Optional[Dict] = None):
+                        metadata: dict | None = None):
         """Log email events (sent, opened, clicked, etc.)"""
         try:
             # Get lead ID by email
@@ -97,7 +97,7 @@ class SupabaseDatabase:
     
     def save_analysis_results(self, 
                               email: str, 
-                              results: Dict):
+                              results: dict):
         """Save analysis results for a lead"""
         try:
             # Get lead ID by email
@@ -123,7 +123,7 @@ class SupabaseDatabase:
         except Exception as e:
             logger.error(f"Error saving analysis results: {e}")
     
-    def get_lead_stats(self) -> Dict:
+    def get_lead_stats(self) -> dict:
         """Get lead statistics"""
         try:
             # Total leads - count by getting all IDs (more reliable than COUNT)
@@ -172,7 +172,7 @@ class SupabaseDatabase:
                 'conversion_rate': 0
             }
     
-    def get_recent_leads(self, limit: int = 10) -> List[Dict]:
+    def get_recent_leads(self, limit: int = 10) -> list[dict]:
         """Get recent leads"""
         try:
             response = self.client.table("leads").select("*").order(
@@ -223,7 +223,7 @@ class SupabaseDatabase:
             logger.error(f"Error revoking api key: {e}")
             return False
     
-    def verify_api_key(self, key_hash: str) -> Optional[str]:
+    def verify_api_key(self, key_hash: str) -> str | None:
         """Verify API key and return user email"""
         try:
             response = self.client.table("api_keys").select("user_email").eq(
@@ -261,7 +261,7 @@ class SupabaseDatabase:
         except Exception as e:
             logger.error(f"Error logging usage: {e}")
     
-    def get_realtime_team_costs(self, user_email: str, days: int = 30) -> Dict:
+    def get_realtime_team_costs(self, user_email: str, days: int = 30) -> dict:
         """Get team cost breakdown for real-time tracking users"""
         try:
             cutoff_date = (datetime.now() - timedelta(days=days)).isoformat()
@@ -282,7 +282,7 @@ class SupabaseDatabase:
             logger.error(f"Error getting realtime team costs: {e}")
             return {}
     
-    def get_recent_usage(self, user_email: str, limit: int = 50) -> List[Dict]:
+    def get_recent_usage(self, user_email: str, limit: int = 50) -> list[dict]:
         """Get recent API calls for real-time dashboard"""
         try:
             response = self.client.table("usage_logs").select(
@@ -294,7 +294,7 @@ class SupabaseDatabase:
             logger.error(f"Error getting recent usage: {e}")
             return []
     
-    def get_admin_by_email(self, email: str) -> Optional[Dict]:
+    def get_admin_by_email(self, email: str) -> dict | None:
         """Get admin user by email"""
         try:
             response = self.client.table("admin_users").select("*").eq(
@@ -319,7 +319,7 @@ class SupabaseDatabase:
             logger.error(f"Error creating admin: {e}")
             return False
     
-    def get_analysis_results_by_email(self, email: str) -> Optional[Dict]:
+    def get_analysis_results_by_email(self, email: str) -> dict | None:
         """Get analysis results for a specific email"""
         try:
             # Get lead ID first

@@ -1,13 +1,12 @@
-import smtplib
-import socket
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Dict, Optional
+import logging
 import os
+import smtplib
 from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 import jinja2
 from dotenv import load_dotenv
-import logging
 
 load_dotenv()
 
@@ -40,7 +39,7 @@ class EmailService:
                    to_email: str, 
                    subject: str, 
                    template_name: str, 
-                   context: Dict) -> bool:
+                   context: dict) -> bool:
         """Send email using SMTP with improved error handling for cloud environments"""
         
         # Check if SMTP is configured
@@ -85,7 +84,7 @@ class EmailService:
                 logger.info(f"✅ Email sent to {to_email}")
                 return True
             
-            except socket.timeout:
+            except TimeoutError:
                 logger.error(f"❌ Socket timeout connecting to {self.smtp_host}:{self.smtp_port}")
                 logger.error(f"   Check if port {self.smtp_port} is accessible from Railway")
                 return False
@@ -97,7 +96,7 @@ class EmailService:
         except smtplib.SMTPException as e:
             logger.error(f"❌ SMTP error: {e}")
             return False
-        except (TimeoutError, socket.timeout) as e:
+        except TimeoutError as e:
             logger.error(f"❌ SMTP connection timeout: {e}")
             logger.error(f"   Unable to reach {self.smtp_host}:{self.smtp_port}")
             logger.error("   Railway platform is likely blocking outbound port 587 to private servers")
@@ -120,7 +119,7 @@ class EmailService:
             logger.error(f"   Debug: SMTP={self.smtp_host}:{self.smtp_port}")
             return False
     
-    def send_welcome_email(self, email: str, name: Optional[str] = None):
+    def send_welcome_email(self, email: str, name: str | None = None):
         """Send welcome email with tool access"""
         
         context = {
@@ -136,7 +135,7 @@ class EmailService:
             context=context
         )
     
-    def send_results_email(self, email: str, results: Dict):
+    def send_results_email(self, email: str, results: dict):
         """Send analysis results via email"""
         
         context = {
@@ -157,7 +156,7 @@ class EmailService:
             context=context
         )
     
-    def send_admin_notification(self, lead_email: str, lead_data: Dict):
+    def send_admin_notification(self, lead_email: str, lead_data: dict):
         """Notify admin of new lead"""
         
         # Skip if SMTP not configured
@@ -214,7 +213,7 @@ class EmailService:
         except smtplib.SMTPAuthenticationError as e:
             logger.error(f"❌ SMTP Authentication failed for admin notification: {e}")
             return False
-        except (TimeoutError, socket.timeout, OSError) as e:
+        except (TimeoutError, OSError) as e:
             logger.error(f"❌ Admin notification timeout/network error: {type(e).__name__}: {e}")
             logger.warning("   Skipping admin notification (non-critical)")
             return False

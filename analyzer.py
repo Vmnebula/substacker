@@ -1,9 +1,8 @@
-import pandas as pd
 import hashlib
-from typing import Dict, List, Tuple, Generator
-import json
-from datetime import datetime, timedelta
+
+import pandas as pd
 from cachetools import LRUCache
+
 
 class OpenAIWasteAnalyzer:
     """Identifies waste patterns in LLM API usage with multi-provider support"""
@@ -156,7 +155,7 @@ class OpenAIWasteAnalyzer:
         
         return df
     
-    def analyze_usage(self, df: pd.DataFrame) -> Dict:
+    def analyze_usage(self, df: pd.DataFrame) -> dict:
         """Main analysis function with multi-provider support"""
         
         # Normalize column names (handle case-insensitive and space variations)
@@ -268,7 +267,7 @@ Please upload a CSV or JSON file from your LLM API logs.
         
         return results
     
-    def _calculate_costs_by_team(self, df: pd.DataFrame) -> Dict[str, float]:
+    def _calculate_costs_by_team(self, df: pd.DataFrame) -> dict[str, float]:
         """Calculate total cost by team"""
         team_costs = {}
         
@@ -283,7 +282,7 @@ Please upload a CSV or JSON file from your LLM API logs.
         # Sort by cost (descending)
         return dict(sorted(team_costs.items(), key=lambda x: x[1], reverse=True))
     
-    def _calculate_costs_by_provider(self, df: pd.DataFrame) -> Dict[str, Dict]:
+    def _calculate_costs_by_provider(self, df: pd.DataFrame) -> dict[str, dict]:
         """Calculate total cost by provider (NEW: Multi-provider support)"""
         provider_costs = {}
         
@@ -313,7 +312,7 @@ Please upload a CSV or JSON file from your LLM API logs.
             total += self._calculate_row_cost(row)
         return total
     
-    def _find_duplicate_prompts(self, df: pd.DataFrame) -> Dict:
+    def _find_duplicate_prompts(self, df: pd.DataFrame) -> dict:
         """Find identical prompts that could be cached"""
         
         # Hash prompts to find duplicates
@@ -323,7 +322,7 @@ Please upload a CSV or JSON file from your LLM API logs.
         waste = 0
         examples = []
         
-        for hash_val, group in df.groupby('prompt_hash'):
+        for _, group in df.groupby('prompt_hash'):
             if len(group) > 1:
                 # Cost of duplicates (excluding first occurrence)
                 duplicate_cost = self._calculate_group_cost(group.iloc[1:])
@@ -349,7 +348,7 @@ Please upload a CSV or JSON file from your LLM API logs.
             'savings_range': '20-30%'
         }
     
-    def _find_model_overkill(self, df: pd.DataFrame) -> Dict:
+    def _find_model_overkill(self, df: pd.DataFrame) -> dict:
         """Find expensive model usage for simple tasks (multi-provider aware)"""
         
         waste = 0
@@ -405,7 +404,7 @@ Please upload a CSV or JSON file from your LLM API logs.
             'savings_range': '60-95%'
         }
     
-    def _find_system_prompt_waste(self, df: pd.DataFrame) -> Dict:
+    def _find_system_prompt_waste(self, df: pd.DataFrame) -> dict:
         """Find repeated system prompts that could be optimized"""
         
         waste = 0
@@ -427,7 +426,7 @@ Please upload a CSV or JSON file from your LLM API logs.
                 system_prompts[prompt_hash]['total_tokens'] += len(system_prompt) / 4  # Rough token estimate
         
         # Calculate waste from repeated long system prompts
-        for hash_val, data in system_prompts.items():
+        for data in system_prompts.values():
             if data['count'] > 10:  # Repeated more than 10 times
                 # Could be shortened or cached
                 waste += (data['total_tokens'] * 0.7 * 0.001)  # Assume 70% reduction possible
@@ -446,7 +445,7 @@ Please upload a CSV or JSON file from your LLM API logs.
             'savings_range': '10-20%'
         }
     
-    def _find_cacheable_patterns(self, df: pd.DataFrame) -> Dict:
+    def _find_cacheable_patterns(self, df: pd.DataFrame) -> dict:
         """Find semantically similar queries that could share responses"""
         
         # Simple pattern matching for common cacheable queries
@@ -478,7 +477,7 @@ Please upload a CSV or JSON file from your LLM API logs.
             'savings_range': '15-25%'
         }
     
-    def _find_token_waste(self, df: pd.DataFrame) -> Dict:
+    def _find_token_waste(self, df: pd.DataFrame) -> dict:
         """Find token inefficiencies"""
         
         waste = 0
@@ -554,11 +553,10 @@ Please upload a CSV or JSON file from your LLM API logs.
         """Calculate total cost for a group of API calls"""
         return sum(self._calculate_row_cost(row) for _, row in group.iterrows())
     
-    def _generate_recommendations(self, patterns: List[Dict]) -> List[Dict]:
+    def _generate_recommendations(self, patterns: list[dict]) -> list[dict]:
         """Generate actionable recommendations based on patterns"""
         
         recommendations = []
-        total_waste = sum(p['waste_amount'] for p in patterns)
         
         # Sort patterns by waste amount
         patterns_sorted = sorted(patterns, key=lambda x: x['waste_amount'], reverse=True)

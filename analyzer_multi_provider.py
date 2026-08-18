@@ -4,9 +4,11 @@ Enhanced wrapper for analyzer_v2 with additional multi-provider features.
 """
 
 import logging
-from typing import Dict, List, Any
-from analyzer_v2 import OpenAIWasteAnalyzer, Provider
+from typing import Any
+
 import pandas as pd
+
+from analyzer_v2 import OpenAIWasteAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +23,7 @@ class MultiProviderAnalyzer:
         self.base_analyzer = OpenAIWasteAnalyzer()
         self.provider_stats = {}
 
-    def get_all_provider_pricing(self) -> Dict[str, Any]:
+    def get_all_provider_pricing(self) -> dict[str, Any]:
         """Get current pricing for all supported AI providers"""
         pricing_info = {}
 
@@ -68,7 +70,7 @@ class MultiProviderAnalyzer:
 
         return pricing_info
 
-    def compare_providers(self, usage_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def compare_providers(self, usage_data: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Compare costs across providers for given usage patterns.
         
@@ -147,7 +149,7 @@ class MultiProviderAnalyzer:
 
         return comparison
 
-    def analyze_with_optimization(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def analyze_with_optimization(self, df: pd.DataFrame) -> dict[str, Any]:
         """
         Analyze usage and provide optimization recommendations across providers.
         
@@ -179,7 +181,7 @@ class MultiProviderAnalyzer:
 
         return results
 
-    def get_provider_breakdown_detailed(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def get_provider_breakdown_detailed(self, df: pd.DataFrame) -> dict[str, Any]:
         """
         Get detailed breakdown by provider with team information.
         
@@ -213,8 +215,8 @@ class MultiProviderAnalyzer:
         self,
         current_provider: str,
         target_provider: str,
-        usage_data: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        usage_data: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """
         Estimate cost savings from migrating to a different provider.
         

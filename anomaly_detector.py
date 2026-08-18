@@ -6,9 +6,9 @@ Uses statistical analysis and ML-ready patterns.
 """
 
 import logging
-from typing import Dict, List, Any, Tuple
-from datetime import datetime, timedelta
 import statistics
+from datetime import datetime, timedelta
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class AnomalyDetector:
             "datetime": datetime.fromisoformat(timestamp)
         })
     
-    def detect_spike(self, current_cost: float, window_hours: int = 24) -> Tuple[bool, Dict[str, Any]]:
+    def detect_spike(self, current_cost: float, window_hours: int = 24) -> tuple[bool, dict[str, Any]]:
         """
         Detect sudden cost spike in recent window.
         
@@ -76,7 +76,7 @@ class AnomalyDetector:
             "severity": "high" if z_score > 3.0 else "medium"
         }
     
-    def detect_trend(self, team: str, window_days: int = 7) -> Tuple[bool, Dict[str, Any]]:
+    def detect_trend(self, team: str, window_days: int = 7) -> tuple[bool, dict[str, Any]]:
         """
         Detect gradual cost increase trend.
         
@@ -117,7 +117,7 @@ class AnomalyDetector:
             "severity": "high" if increase_pct > 50 else "medium"
         }
     
-    def detect_model_mismatch(self, model: str, tokens: int, cost: float) -> Tuple[bool, Dict[str, Any]]:
+    def detect_model_mismatch(self, model: str, tokens: int, cost: float) -> tuple[bool, dict[str, Any]]:
         """
         Detect inefficient model usage (e.g., using GPT-4 for simple tasks).
         
@@ -153,7 +153,7 @@ class AnomalyDetector:
         
         return False, {"reason": "model_appropriate"}
     
-    def detect_team_anomaly(self, team: str, current_team_cost: float) -> Tuple[bool, Dict[str, Any]]:
+    def detect_team_anomaly(self, team: str, current_team_cost: float) -> tuple[bool, dict[str, Any]]:
         """
         Detect if a team's spending is unusual compared to history.
         
@@ -188,7 +188,7 @@ class AnomalyDetector:
             "severity": "high" if z_score > 3.0 else "medium"
         }
     
-    def analyze_all(self, cost: float, team: str, model: str, tokens: int) -> List[Dict[str, Any]]:
+    def analyze_all(self, cost: float, team: str, model: str, tokens: int) -> list[dict[str, Any]]:
         """
         Run all anomaly detection methods and return findings.
         
@@ -221,7 +221,7 @@ class AnomalyDetector:
         
         return anomalies
     
-    def get_summary(self, team: str) -> Dict[str, Any]:
+    def get_summary(self, team: str) -> dict[str, Any]:
         """Get anomaly summary for a team."""
         team_data = [d for d in self.historical_data if d["team"] == team]
         
@@ -245,7 +245,7 @@ class AnomalyDetector:
 detector = AnomalyDetector()
 
 
-def check_for_anomalies(cost: float, team: str, model: str, tokens: int) -> List[Dict[str, Any]]:
+def check_for_anomalies(cost: float, team: str, model: str, tokens: int) -> list[dict[str, Any]]:
     """
     Check for anomalies in a cost event.
     

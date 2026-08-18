@@ -2,13 +2,13 @@
  Cost Analyzer
 """
 
-import pandas as pd
 import hashlib
-from typing import Dict, List, Optional, Tuple
-from decimal import Decimal, ROUND_HALF_UP
-from dataclasses import dataclass
-from enum import Enum
 import logging
+from dataclasses import dataclass
+from decimal import ROUND_HALF_UP, Decimal
+from enum import Enum
+
+import pandas as pd
 from cachetools import LRUCache
 
 # Set up logging
@@ -76,7 +76,7 @@ class OpenAIWasteAnalyzer:
         # Prompt hash cache for duplicate detection
         self.prompt_hash_cache = LRUCache(maxsize=10000)
         
-    def _initialize_pricing(self) -> Dict[str, ModelPricing]:
+    def _initialize_pricing(self) -> dict[str, ModelPricing]:
         """Initialize pricing data with Decimal precision"""
         return {
             # OpenAI
@@ -148,7 +148,7 @@ class OpenAIWasteAnalyzer:
         
         return tokens
     
-    def _normalize_model_name(self, model_name: str) -> Optional[str]:
+    def _normalize_model_name(self, model_name: str) -> str | None:
         """
         Normalize model name to canonical form with robust matching
         
@@ -215,9 +215,8 @@ class OpenAIWasteAnalyzer:
         
         # Azure normalization
         if 'azure' in model_lower:
-            # Normalize azure-gpt-35-turbo to azure-gpt-3.5-turbo
+            # Azure reports GPT-3.5 as 'gpt-35-turbo'; the pricing table is keyed the same way.
             if '35' in model_lower:
-                normalized = model_lower.replace('35', '3.5')
                 self.model_cache[model_name] = 'azure-gpt-35-turbo'
                 return 'azure-gpt-35-turbo'
             elif 'gpt4' in model_lower or 'gpt-4' in model_lower:
@@ -255,7 +254,7 @@ class OpenAIWasteAnalyzer:
         
         return Provider.UNKNOWN
     
-    def _get_model_pricing(self, model_name: str) -> Tuple[ModelPricing, bool]:
+    def _get_model_pricing(self, model_name: str) -> tuple[ModelPricing, bool]:
         """
         Get pricing for model with unknown model tracking
         
@@ -370,7 +369,7 @@ class OpenAIWasteAnalyzer:
         
         return df
     
-    def analyze_usage(self, df: pd.DataFrame) -> Dict:
+    def analyze_usage(self, df: pd.DataFrame) -> dict:
         """Main analysis function with production-grade error handling"""
         
         # Normalize columns
@@ -478,7 +477,7 @@ YOUR COLUMNS: {', '.join(df.columns)}
         
         return results
     
-    def _find_duplicate_prompts(self, df: pd.DataFrame, total_cost: Decimal) -> Dict:
+    def _find_duplicate_prompts(self, df: pd.DataFrame, total_cost: Decimal) -> dict:
         """Find exact duplicate prompts that could be cached"""
         if 'prompt' not in df.columns or df['prompt'].isna().all():
             return {
@@ -577,7 +576,7 @@ YOUR COLUMNS: {', '.join(df.columns)}
         
         return has_simple_indicator or is_very_short
     
-    def _find_model_overkill(self, df: pd.DataFrame, total_cost: Decimal) -> Dict:
+    def _find_model_overkill(self, df: pd.DataFrame, total_cost: Decimal) -> dict:
         """Find expensive model usage for simple tasks with sophisticated heuristics"""
         if 'prompt' not in df.columns or df['prompt'].isna().all():
             return {
@@ -653,7 +652,7 @@ YOUR COLUMNS: {', '.join(df.columns)}
             'savings_range': '60-95%'
         }
     
-    def _generate_recommendations(self, patterns: List[Dict]) -> List[Dict]:
+    def _generate_recommendations(self, patterns: list[dict]) -> list[dict]:
         """Generate actionable recommendations based on patterns"""
         recommendations = []
         

@@ -6,12 +6,12 @@ Safe to use alongside existing HTTP endpoints.
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, Set, Callable, Any, Optional
+import uuid
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
-import uuid
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +37,9 @@ class WebSocketManager:
     """
     
     def __init__(self):
-        self.active_connections: Dict[str, Any] = {}
-        self.subscriptions: Dict[str, Set[str]] = {}  # user_email -> connection_ids
-        self.event_handlers: Dict[EventType, list[Callable]] = {
+        self.active_connections: dict[str, Any] = {}
+        self.subscriptions: dict[str, set[str]] = {}  # user_email -> connection_ids
+        self.event_handlers: dict[EventType, list[Callable]] = {
             event_type: [] for event_type in EventType
         }
         self.connection_lock = asyncio.Lock()
@@ -98,7 +98,7 @@ class WebSocketManager:
                 
                 logger.info(f"WebSocket disconnected: {connection_id}")
     
-    async def _send_to_connection(self, connection_id: str, message: Dict[str, Any]):
+    async def _send_to_connection(self, connection_id: str, message: dict[str, Any]):
         """Send message to specific connection."""
         if connection_id not in self.active_connections:
             return
@@ -111,7 +111,7 @@ class WebSocketManager:
             logger.error(f"Error sending to {connection_id}: {e}")
             await self.disconnect(connection_id)
     
-    async def broadcast_to_user(self, user_email: str, event_type: EventType, data: Dict[str, Any]):
+    async def broadcast_to_user(self, user_email: str, event_type: EventType, data: dict[str, Any]):
         """Broadcast event to all connections for a user."""
         if user_email not in self.subscriptions:
             return
@@ -131,7 +131,7 @@ class WebSocketManager:
             except Exception as e:
                 logger.error(f"Error broadcasting to {connection_id}: {e}")
     
-    async def broadcast_to_all(self, event_type: EventType, data: Dict[str, Any]):
+    async def broadcast_to_all(self, event_type: EventType, data: dict[str, Any]):
         """Broadcast event to all connected users."""
         message = {
             "type": event_type.value,
@@ -153,7 +153,7 @@ class WebSocketManager:
         if event_type in self.event_handlers:
             self.event_handlers[event_type].append(handler)
     
-    async def emit_event(self, event_type: EventType, user_email: str, data: Dict[str, Any]):
+    async def emit_event(self, event_type: EventType, user_email: str, data: dict[str, Any]):
         """
         Emit an event and trigger handlers.
         Then broadcast to user's WebSocket connections.
@@ -171,7 +171,7 @@ class WebSocketManager:
         # Broadcast to user
         await self.broadcast_to_user(user_email, event_type, data)
     
-    def get_connection_stats(self) -> Dict[str, Any]:
+    def get_connection_stats(self) -> dict[str, Any]:
         """Get WebSocket connection statistics."""
         total_events_sent = sum(
             conn["events_sent"] 
@@ -195,7 +195,7 @@ class WebSocketManager:
 ws_manager = WebSocketManager()
 
 
-async def broadcast_cost_update(user_email: str, cost_data: Dict[str, Any]):
+async def broadcast_cost_update(user_email: str, cost_data: dict[str, Any]):
     """Helper to broadcast cost updates."""
     await ws_manager.broadcast_to_user(
         user_email,
@@ -204,7 +204,7 @@ async def broadcast_cost_update(user_email: str, cost_data: Dict[str, Any]):
     )
 
 
-async def broadcast_new_lead(lead_data: Dict[str, Any]):
+async def broadcast_new_lead(lead_data: dict[str, Any]):
     """Helper to broadcast new lead to admin."""
     await ws_manager.broadcast_to_all(
         EventType.NEW_LEAD,
@@ -212,7 +212,7 @@ async def broadcast_new_lead(lead_data: Dict[str, Any]):
     )
 
 
-async def broadcast_analysis_complete(user_email: str, analysis_data: Dict[str, Any]):
+async def broadcast_analysis_complete(user_email: str, analysis_data: dict[str, Any]):
     """Helper to broadcast analysis completion."""
     await ws_manager.broadcast_to_user(
         user_email,
@@ -221,7 +221,7 @@ async def broadcast_analysis_complete(user_email: str, analysis_data: Dict[str, 
     )
 
 
-async def broadcast_anomaly(user_email: str, anomaly_data: Dict[str, Any]):
+async def broadcast_anomaly(user_email: str, anomaly_data: dict[str, Any]):
     """Helper to broadcast detected anomaly."""
     await ws_manager.broadcast_to_user(
         user_email,

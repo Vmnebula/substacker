@@ -1,9 +1,9 @@
-import pytest
-import os
 import hashlib
+
 from analyzer_multi_provider import MultiProviderAnalyzer
 from analyzer_v2 import OpenAIWasteAnalyzer
 from security import InputValidator
+
 
 def test_input_validator_email():
     """Test email validation logic."""
