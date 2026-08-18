@@ -290,6 +290,13 @@
     }
 }
 
+/* Grid items default to min-width:auto, so they refuse to shrink below their
+   min-content width and push the page sideways on narrow screens. */
+.method-selection,
+.method-selection > * {
+    min-width: 0;
+}
+
 .method-card {
     background: white;
     border: 3px solid var(--border-color);

@@ -54,7 +54,7 @@ jobs:
       - name: Run test suite
         env:
           SECRET_KEY: ci_secret_key_not_used_outside_of_tests_32chars
-        run: pytest --cov=. --cov-report=term-missing
+        run: pytest --cov=. --cov-report=term-missing --ignore=tests/test_frontend.py
 
   boot:
     name: Application boots with default config
@@ -82,3 +82,27 @@ jobs:
           assert len(app.app.routes) > 0, 'no routes registered'
           print(f'{len(app.app.routes)} routes registered on the {type(app.db).__name__} backend')
           "
+
+  frontend:
+    name: Frontend (browser)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Check pages for overflow, CSP violations and missing assets
+        env:
+          SECRET_KEY: ci_secret_key_not_used_outside_of_tests_32chars
+        run: pytest tests/test_frontend.py -q

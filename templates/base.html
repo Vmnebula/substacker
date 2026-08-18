@@ -6,11 +6,26 @@
     <title>{% block title %}Substacker - AI Cost Intelligence Platform{% endblock %}</title>
     
     <!-- Meta Tags -->
-    <meta name="description" content="Substacker: Team-level AI cost attribution and budget management across multiple LLM providers">
-    <meta name="theme-color" content="#667eea">
-    <meta property="og:title" content="Substacker - AI Cost Intelligence">
-    <meta property="og:description" content="See which teams spend what on AI. Multi-provider support with real-time alerts.">
-    <meta property="og:image" content="/static/assets/og-image.jpg">
+    <meta name="description" content="{% block meta_description %}Substacker attributes AI spend to the teams, projects and models that caused it, across OpenAI, Anthropic, Gemini and Azure.{% endblock %}">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="canonical" href="{{ BASE_URL }}{{ request.url.path }}">
+
+    <!-- Open Graph and Twitter. Absolute URLs are required: scrapers do not resolve
+         relative paths, so a relative og:image renders no preview at all. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Substacker">
+    <meta property="og:url" content="{{ BASE_URL }}{{ request.url.path }}">
+    <meta property="og:title" content="{% block og_title %}Substacker - AI Cost Intelligence{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}See which teams spend what on AI. Attribution, waste analysis and budget alerts across four providers.{% endblock %}">
+    <meta property="og:image" content="{{ BASE_URL }}/static/assets/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Substacker: attribute AI spend across OpenAI, Anthropic, Gemini and Azure">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ self.og_title() }}">
+    <meta name="twitter:description" content="{{ self.og_description() }}">
+    <meta name="twitter:image" content="{{ BASE_URL }}/static/assets/og-image.jpg">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

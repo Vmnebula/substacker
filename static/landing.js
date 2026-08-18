@@ -576,7 +576,7 @@ console.log(
 );
 
 /**
- * Handle Demo GIF Loading
+ * Reveal the demo once its first frame is available, and retire the skeleton.
  */
 function handleDemoLoad() {
     const demoGif = document.getElementById('demoGif');
@@ -594,7 +594,7 @@ function handleDemoLoad() {
 }
 
 /**
- * Handle Demo GIF Loading Error
+ * Replace the skeleton with a retry affordance if the demo cannot be fetched.
  */
 function handleDemoError() {
     const skeleton = document.getElementById('demoSkeleton');
@@ -610,11 +610,44 @@ function handleDemoError() {
                 <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>
                 <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
             </svg>
-            <p>Failed to load demo</p>
+            <p>Could not load the demo</p>
             <button onclick="location.reload()" style="margin-top: 12px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">Retry</button>
         </div>
     `;
 }
+
+/**
+ * Respect the viewer's motion preference for the autoplaying demo.
+ *
+ * The markup carries `autoplay` so the demo starts for everyone by default, which is
+ * what most visitors expect. Anyone who has asked their system to reduce motion gets a
+ * still poster frame instead, and the preference is watched live so toggling it in the
+ * OS takes effect without a reload.
+ */
+function applyDemoMotionPreference() {
+    const demo = document.getElementById('demoGif');
+    if (!demo || typeof demo.pause !== 'function') return;
+
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const sync = () => {
+        if (query.matches) {
+            demo.pause();
+            demo.removeAttribute('autoplay');
+            demo.currentTime = 0;
+        } else if (demo.paused) {
+            // play() rejects when the browser blocks autoplay; the poster remains.
+            demo.play().catch(() => {});
+        }
+    };
+
+    sync();
+    if (typeof query.addEventListener === 'function') {
+        query.addEventListener('change', sync);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', applyDemoMotionPreference);
 
 // Make functions globally available
 window.handleDemoLoad = handleDemoLoad;

@@ -108,6 +108,43 @@
             border-collapse: collapse;
             margin: 15px 0;
         }
+
+        /* A table with several columns cannot shrink to phone width. Give it its own
+           horizontal scroll area so the document itself never scrolls sideways. */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 15px 0;
+        }
+
+        .table-scroll table {
+            margin: 0;
+            min-width: 32rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.95rem;
+            }
+
+            .container,
+            .section {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            pre {
+                font-size: 0.85em;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
         th {
             background: #f8f9fa;
             padding: 12px;
@@ -312,7 +349,7 @@ openai = track_openai(
                 <p>Log an API call to Substacker.</p>
 
                 <h4>Request Body</h4>
-                <table>
+                <div class="table-scroll"><table>
                     <tr>
                         <th>Field</th>
                         <th>Type</th>
@@ -355,7 +392,7 @@ openai = track_openai(
                         <td><span class="badge optional">No</span></td>
                         <td>Provider (e.g., "openai", "anthropic", "google")</td>
                     </tr>
-                </table>
+                </table></div>
 
                 <h4>Example Request</h4>
                 <pre><code class="language-bash">curl -X POST http://localhost:8000/api/track \
@@ -469,7 +506,7 @@ openai = track_openai(
             <div class="section">
                 <h2><i class="fas fa-exclamation-triangle"></i> Error Codes</h2>
 
-                <table>
+                <div class="table-scroll"><table>
                     <tr>
                         <th>Code</th>
                         <th>Meaning</th>
@@ -495,7 +532,7 @@ openai = track_openai(
                         <td>Server error</td>
                         <td>Check status page or contact support.</td>
                     </tr>
-                </table>
+                </table></div>
             </div>
 
             <!-- Examples Section -->

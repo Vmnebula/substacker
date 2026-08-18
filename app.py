@@ -48,6 +48,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/sample_data", StaticFiles(directory="sample_data"), name="sample_data")
 templates = Jinja2Templates(directory="templates")
 
+# Open Graph and Twitter cards require absolute URLs; a relative path is ignored by
+# every scraper, which is why link previews rendered without an image. BASE_URL is
+# already configured for links in outbound email, so reuse it here.
+templates.env.globals["BASE_URL"] = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
+
 # Initialize services
 # DATABASE_TYPE selects the storage backend: "sqlite" needs no configuration, while
 # "supabase" requires SUPABASE_URL and SUPABASE_KEY.

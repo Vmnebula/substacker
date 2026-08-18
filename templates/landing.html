@@ -114,15 +114,32 @@
                         </div>
                     </div>
                     
-                    <!-- Actual Demo GIF -->
-                    <img 
-                        src="/static/substacker_product_demo.gif" 
-                        alt="Substacker Platform Demo - Real-time Team AI Cost Attribution" 
-                        class="hero-image demo-gif"
+                    <!-- Product demo. Encoded as video rather than GIF: the original
+                         animation was a 12 MB GIF, which the browser cannot stream and
+                         which blocked the hero on slow connections. Same footage is
+                         950 KB as H.264 and 554 KB as VP9, and the poster frame paints
+                         immediately at 37 KB. -->
+                    <video
                         id="demoGif"
-                        loading="lazy"
-                        onload="handleDemoLoad()"
+                        class="hero-image demo-gif"
+                        width="1280"
+                        height="640"
+                        poster="/static/media/demo-poster.jpg"
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        preload="metadata"
+                        aria-label="Substacker platform demo: uploading usage data and reviewing team level AI cost attribution"
+                        onloadeddata="handleDemoLoad()"
                         onerror="handleDemoError()">
+                        <source src="/static/media/demo.webm" type="video/webm">
+                        <source src="/static/media/demo.mp4" type="video/mp4">
+                        <img
+                            src="/static/media/demo-poster.jpg"
+                            alt="Substacker dashboard showing total monthly spend, teams tracked, and optimization potential"
+                            class="hero-image">
+                    </video>
                     
                     <!-- Play Indicator Badge -->
                     <div class="demo-badge">

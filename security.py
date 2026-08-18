@@ -237,13 +237,23 @@ class SecurityHeaders:
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+        # Every origin listed here is one the pages actually load from. Two entries
+        # were missing and the browser blocked the requests silently:
+        #   - Clarity beacons post to regional shards (k/r/o/f.clarity.ms), not to
+        #     www.clarity.ms, so every analytics event was refused.
+        #   - dev_docs loads highlight.js from cdnjs, which was allowed for styles and
+        #     fonts but not for scripts, so code samples were never highlighted.
         'Content-Security-Policy': (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://www.clarity.ms https://scripts.clarity.ms https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://*.clarity.ms https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
             "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
             "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' https://www.clarity.ms https://cdn.jsdelivr.net"
+            "media-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
+            "connect-src 'self' https://*.clarity.ms https://cdn.jsdelivr.net"
         ),
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'geolocation=(), microphone=(), camera=()'

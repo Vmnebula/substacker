@@ -1241,6 +1241,10 @@ footer {
 }
 
 .demo-loading-skeleton {
+    /* Hidden automatically after a few seconds. handleDemoLoad() normally does this
+       as soon as the first frame decodes; the animation is the fallback for when the
+       event does not arrive, so the skeleton can never sit on top of the demo forever. */
+    animation: demoSkeletonRetire 0s ease 4s forwards;
     position: absolute;
     top: 0;
     left: 0;
@@ -1323,8 +1327,15 @@ footer {
     width: 100%;
     height: auto;
     display: block;
-    opacity: 0;
+    /* The video carries a poster frame, so the first paint is immediate and there is
+       nothing to hide. Starting at opacity 0 meant the hero stayed blank whenever the
+       script failed to run, since only JavaScript ever added .loaded. */
+    opacity: 1;
     transition: opacity 0.6s ease;
+    /* Reserve the correct box before metadata arrives so the hero does not reflow. */
+    aspect-ratio: 2 / 1;
+    object-fit: cover;
+    background: var(--gray-100);
 }
 
 .hero-image.loaded {
@@ -1459,5 +1470,35 @@ footer {
     .demo-badge svg {
         width: 12px;
         height: 12px;
+    }
+}
+
+
+@keyframes demoSkeletonRetire {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* An autoplaying, looping demo is motion the viewer did not ask for. Readers who have
+   asked the system to reduce motion get the poster frame and the hover zoom removed;
+   the accompanying script also pauses playback. */
+@media (prefers-reduced-motion: reduce) {
+    .demo-gif,
+    .demo-video-wrapper:hover .demo-gif {
+        transform: none;
+        transition: none;
+    }
+
+    .demo-loading-skeleton {
+        animation: none;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .skeleton-shimmer,
+    .skeleton-pulse {
+        animation: none;
     }
 }

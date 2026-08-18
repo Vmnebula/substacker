@@ -26,6 +26,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Starlette removed the legacy argument order, and on the upgraded stack every
   server-rendered page raised `TypeError: unhashable type: 'dict'` at request time.
 - `requirements-dev.txt` added for test and lint tooling.
+- The hero demo is served as H.264 and VP9 video rather than a 12 MB GIF: 950 KB and
+  554 KB respectively, with a 37 KB poster frame that paints immediately. The
+  animation now respects `prefers-reduced-motion`.
+- Browser-level tests, run as their own CI job, assert that no page overflows a phone
+  viewport, that no page triggers a CSP violation, and that the hero and social assets
+  are actually served.
+- A real 1200x630 Open Graph card, plus `og:url`, `og:type`, `og:site_name`, image
+  dimensions, alt text, Twitter card tags and a canonical link.
+- Removed 2,861 lines of unreferenced CSS and JavaScript: a duplicate `admin.js` that
+  had been superseded by `js/admin.js`, and `design-system.css`, `footer.css`,
+  `navbar.css`, `theme.css`, `js/api.js`, `js/components.js` and `js/utils.js`, none
+  of which were loaded by any template.
+
+### Fixed
+
+- The landing page hero pointed at a demo image that had been removed from the
+  repository, so the live site rendered a broken image.
+- The analyzer's option cards overflowed a 390px viewport by 420px, pushing the SDK
+  and demo buttons off screen. `minmax(250px, 1fr)` sets a 250px floor per track and
+  `auto-fit` only collapses empty tracks, so three buttons forced a 790px minimum.
+  The CSV guide's navbar and the developer docs' tables overflowed the same way.
+- The Content Security Policy blocked two things the pages depend on. Analytics
+  beacons post to regional Clarity shards rather than `www.clarity.ms`, so every event
+  was refused, and the syntax highlighter on the developer docs loads from cdnjs,
+  which was permitted for styles but not scripts.
+- `og:image` referenced a file that was never created and used a relative path, which
+  scrapers ignore. Link previews therefore rendered without an image anywhere.
 
 ### Added
 
