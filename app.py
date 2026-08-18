@@ -178,8 +178,7 @@ async def verify_api_key(x_api_key: str | None = Header(None)):
 async def landing_page(request: Request):
     """Professional landing page"""
     stats = db.get_lead_stats()
-    return templates.TemplateResponse("landing.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "landing.html", {
         "stats": stats,
         "current_year": datetime.now().year
     })
@@ -187,9 +186,7 @@ async def landing_page(request: Request):
 @app.get("/admin/login", response_class=HTMLResponse)
 async def admin_login_page(request: Request):
     """Admin login/setup page"""
-    return templates.TemplateResponse("admin_login.html", {
-        "request": request
-    })
+    return templates.TemplateResponse(request, "admin_login.html")
 
 @app.post("/capture-lead")
 @limiter.limit("5/minute")
@@ -255,16 +252,12 @@ async def capture_lead(
 @app.get("/csv-guide", response_class=HTMLResponse)
 async def csv_guide_page(request: Request):
     """CSV upload guide with examples and template download"""
-    return templates.TemplateResponse("csv-guide.html", {
-        "request": request
-    })
+    return templates.TemplateResponse(request, "csv-guide.html")
 
 @app.get("/dev-docs", response_class=HTMLResponse)
 async def dev_docs(request: Request):
     """Developer documentation for API and SDK integration"""
-    return templates.TemplateResponse("dev_docs.html", {
-        "request": request
-    })
+    return templates.TemplateResponse(request, "dev_docs.html")
 
 @app.get("/user/dashboard", response_class=HTMLResponse)
 
@@ -276,12 +269,11 @@ async def budget_management_page(request: Request, admin_email: str = Depends(ve
         budgets = []  # TODO: Load from database
         forecasts = {}  # TODO: Load from database
         
-        return templates.TemplateResponse("budget_management.html", {
-            "request": request,
-            "admin_email": admin_email,
-            "budgets": budgets,
-            "forecasts": forecasts
-        })
+        return templates.TemplateResponse(request, "budget_management.html", {
+        "admin_email": admin_email,
+        "budgets": budgets,
+        "forecasts": forecasts
+    })
     except HTTPException:
         raise
     except Exception as e:
@@ -289,9 +281,7 @@ async def budget_management_page(request: Request, admin_email: str = Depends(ve
 
 async def user_dashboard(request: Request):
     """User-facing dashboard for SDK users to track their own usage (NOT admin stuff)"""
-    return templates.TemplateResponse("user_dashboard.html", {
-        "request": request
-    })
+    return templates.TemplateResponse(request, "user_dashboard.html")
 
 @app.get("/api/csv-template")
 async def get_csv_template():
@@ -323,8 +313,7 @@ async def analyzer_page(request: Request, email: str | None = None):
         # Log that user accessed the tool
         db.log_email_event(email, 'tool_accessed')
     
-    return templates.TemplateResponse("analyzer.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "analyzer.html", {
         "email": email
     })
 
@@ -510,14 +499,13 @@ async def admin_dashboard(request: Request, admin_email: str = Depends(verify_ad
             total_cost_analyzed = 0
 
         # Pass safe computed values into template context
-        return templates.TemplateResponse("admin_dashboard.html", {
-            "request": request,
-            "stats": stats,
-            "leads": recent_leads,
-            "admin_email": admin_email,
-            "total_cost_analyzed": total_cost_analyzed,
-            "keys": api_keys
-        })
+        return templates.TemplateResponse(request, "admin_dashboard.html", {
+        "stats": stats,
+        "leads": recent_leads,
+        "admin_email": admin_email,
+        "total_cost_analyzed": total_cost_analyzed,
+        "keys": api_keys
+    })
     except HTTPException:
         raise
     except Exception as e:
@@ -701,11 +689,10 @@ async def admin_sdk_keys(request: Request, admin_email: str = Depends(verify_adm
     try:
         # List API keys for this admin (email)
         keys = db.get_api_keys(admin_email)
-        return templates.TemplateResponse("admin_sdk_keys.html", {
-            "request": request,
-            "admin_email": admin_email,
-            "keys": keys
-        })
+        return templates.TemplateResponse(request, "admin_sdk_keys.html", {
+        "admin_email": admin_email,
+        "keys": keys
+    })
     except HTTPException:
         raise
     except Exception as e:
@@ -837,7 +824,7 @@ async def realtime_dashboard(user_email: str = Depends(verify_api_key)):
 @app.get("/realtime", response_class=HTMLResponse)
 async def realtime_dashboard_page(request: Request):
     """Real-time cost tracking dashboard with WebSocket"""
-    return templates.TemplateResponse("realtime.html", {"request": request})
+    return templates.TemplateResponse(request, "realtime.html")
 
 
 @app.websocket("/ws")

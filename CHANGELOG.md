@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Resolved fourteen advisories reported against pinned dependencies. `jinja2` was
+  pinned at 3.1.2, which carries two sandbox escapes, a sandbox breakout via malicious
+  filenames, and HTML attribute injection through the `xmlattr` filter; the floor is
+  now 3.1.6. `python-multipart` was pinned at 0.0.6, which carries an arbitrary file
+  write plus several denial-of-service and parameter-smuggling issues; the floor is
+  now 0.0.32.
+- Requirements moved from exact `==` pins to minimum bounds. The exact pins are why
+  these went unpatched: a pinned dependency never receives a security update until
+  someone edits the file.
+
+### Changed
+
+- `templates.TemplateResponse(name, context)` migrated to the current
+  `TemplateResponse(request, name, context)` signature across all ten call sites.
+  Starlette removed the legacy argument order, and on the upgraded stack every
+  server-rendered page raised `TypeError: unhashable type: 'dict'` at request time.
+- `requirements-dev.txt` added for test and lint tooling.
+
+### Added
+
+- HTTP-level tests covering every server-rendered page, the authenticated routes, the
+  multipart upload path, and the OpenAPI schema. The template regression above passed
+  the entire unit suite and imported cleanly, so only a real request could catch it.
+
 ## [0.1.0] - 2026-08-18
 
 First tagged release. Establishes a baseline for the existing codebase.
