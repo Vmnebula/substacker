@@ -49,9 +49,12 @@ app.mount("/sample_data", StaticFiles(directory="sample_data"), name="sample_dat
 templates = Jinja2Templates(directory="templates")
 
 # Open Graph and Twitter cards require absolute URLs; a relative path is ignored by
-# every scraper, which is why link previews rendered without an image. BASE_URL is
-# already configured for links in outbound email, so reuse it here.
-templates.env.globals["BASE_URL"] = os.getenv("BASE_URL", "http://localhost:8000").rstrip("/")
+# every scraper, which is why link previews rendered without an image.
+#
+# Prefer an explicitly configured BASE_URL, but fall back to the URL the request
+# arrived on rather than to localhost. A deployment that forgets to set the variable
+# then still emits correct absolute URLs instead of advertising localhost to crawlers.
+templates.env.globals["SITE_URL"] = (os.getenv("BASE_URL") or "").rstrip("/") or None
 
 # Initialize services
 # DATABASE_TYPE selects the storage backend: "sqlite" needs no configuration, while
