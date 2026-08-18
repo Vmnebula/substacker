@@ -4,6 +4,7 @@
 
 import hashlib
 import logging
+import re
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
@@ -38,9 +39,9 @@ class ModelPricing:
             raise ValueError("Pricing cannot be negative")
 
 
-class OpenAIWasteAnalyzer:
+class CostAnalyzer:
     """
-    Production-grade LLM cost analyzer with multi-provider support
+    Multi-provider LLM cost analyzer
     
     Features:
     - Decimal precision for monetary calculations (no floating point errors)
@@ -77,16 +78,70 @@ class OpenAIWasteAnalyzer:
         self.prompt_hash_cache = LRUCache(maxsize=10000)
         
     def _initialize_pricing(self) -> dict[str, ModelPricing]:
-        """Initialize pricing data with Decimal precision"""
+        """Per-1K-token list prices, keyed by normalised model name.
+
+        Verified against provider pricing pages on 2026-08-18:
+          OpenAI     https://developers.openai.com/api/docs/pricing
+          Anthropic  https://claude.com/pricing#api
+          Gemini     https://ai.google.dev/gemini-api/docs/pricing
+
+        Two caveats worth knowing before you trust a total:
+
+        - These are standard list prices. Batch, cached-input, and committed-use
+          discounts are not modelled, so a real invoice is usually lower.
+        - Some models are priced in tiers by context length (Gemini Pro above 200K
+          input tokens, for example). This table stores the base tier only, so very
+          long-context traffic is under-counted. Tiered pricing is tracked in
+          https://github.com/Vmnebula/substacker/issues.
+
+        Retired models are kept so that historical exports still price correctly.
+        """
         return {
-            # OpenAI
-            'gpt-4': ModelPricing(Decimal('0.03'), Decimal('0.06'), Provider.OPENAI),
-            'gpt-4-turbo': ModelPricing(Decimal('0.01'), Decimal('0.03'), Provider.OPENAI),
-            'gpt-4-turbo-preview': ModelPricing(Decimal('0.01'), Decimal('0.03'), Provider.OPENAI),
+            # ---------------- OpenAI ----------------
+            'gpt-5.6-sol': ModelPricing(Decimal('0.005'), Decimal('0.030'), Provider.OPENAI),
+            'gpt-5.6-terra': ModelPricing(Decimal('0.002'), Decimal('0.012'), Provider.OPENAI),
+            'gpt-5.6-luna': ModelPricing(Decimal('0.0002'), Decimal('0.0012'), Provider.OPENAI),
+            'gpt-5.5': ModelPricing(Decimal('0.005'), Decimal('0.030'), Provider.OPENAI),
+            'gpt-5.5-pro': ModelPricing(Decimal('0.030'), Decimal('0.180'), Provider.OPENAI),
+            'gpt-5.4': ModelPricing(Decimal('0.0025'), Decimal('0.015'), Provider.OPENAI),
+            'gpt-5.4-mini': ModelPricing(Decimal('0.00075'), Decimal('0.0045'), Provider.OPENAI),
+            'gpt-5.4-nano': ModelPricing(Decimal('0.0002'), Decimal('0.00125'), Provider.OPENAI),
+            'gpt-5.4-pro': ModelPricing(Decimal('0.030'), Decimal('0.180'), Provider.OPENAI),
+            'gpt-5.2': ModelPricing(Decimal('0.00175'), Decimal('0.014'), Provider.OPENAI),
+            'gpt-5.2-pro': ModelPricing(Decimal('0.021'), Decimal('0.168'), Provider.OPENAI),
+            'gpt-5.1': ModelPricing(Decimal('0.00125'), Decimal('0.010'), Provider.OPENAI),
+            'gpt-5': ModelPricing(Decimal('0.00125'), Decimal('0.010'), Provider.OPENAI),
+            'gpt-5-mini': ModelPricing(Decimal('0.00025'), Decimal('0.002'), Provider.OPENAI),
+            'gpt-5-nano': ModelPricing(Decimal('0.00005'), Decimal('0.0004'), Provider.OPENAI),
+            'gpt-5-pro': ModelPricing(Decimal('0.015'), Decimal('0.120'), Provider.OPENAI),
+            'gpt-4.1': ModelPricing(Decimal('0.002'), Decimal('0.008'), Provider.OPENAI),
+            'gpt-4.1-mini': ModelPricing(Decimal('0.0004'), Decimal('0.0016'), Provider.OPENAI),
+            'gpt-4.1-nano': ModelPricing(Decimal('0.0001'), Decimal('0.0004'), Provider.OPENAI),
+            'gpt-4o': ModelPricing(Decimal('0.0025'), Decimal('0.010'), Provider.OPENAI),
+            'gpt-4o-mini': ModelPricing(Decimal('0.00015'), Decimal('0.0006'), Provider.OPENAI),
+            'o1': ModelPricing(Decimal('0.015'), Decimal('0.060'), Provider.OPENAI),
+            'o1-pro': ModelPricing(Decimal('0.150'), Decimal('0.600'), Provider.OPENAI),
+            'o3': ModelPricing(Decimal('0.002'), Decimal('0.008'), Provider.OPENAI),
+            'o3-pro': ModelPricing(Decimal('0.020'), Decimal('0.080'), Provider.OPENAI),
+            'o3-mini': ModelPricing(Decimal('0.0011'), Decimal('0.0044'), Provider.OPENAI),
+            'o4-mini': ModelPricing(Decimal('0.0011'), Decimal('0.0044'), Provider.OPENAI),
+            # Retired, retained for historical exports
+            'gpt-4': ModelPricing(Decimal('0.030'), Decimal('0.060'), Provider.OPENAI),
+            'gpt-4-turbo': ModelPricing(Decimal('0.010'), Decimal('0.030'), Provider.OPENAI),
+            'gpt-4-turbo-preview': ModelPricing(Decimal('0.010'), Decimal('0.030'), Provider.OPENAI),
             'gpt-3.5-turbo': ModelPricing(Decimal('0.0005'), Decimal('0.0015'), Provider.OPENAI),
             'gpt-3.5-turbo-16k': ModelPricing(Decimal('0.003'), Decimal('0.004'), Provider.OPENAI),
-            
-            # Anthropic Claude
+
+            # ---------------- Anthropic ----------------
+            'claude-fable-5': ModelPricing(Decimal('0.010'), Decimal('0.050'), Provider.ANTHROPIC),
+            'claude-opus-5': ModelPricing(Decimal('0.005'), Decimal('0.025'), Provider.ANTHROPIC),
+            'claude-opus-4-8': ModelPricing(Decimal('0.005'), Decimal('0.025'), Provider.ANTHROPIC),
+            'claude-opus-4-7': ModelPricing(Decimal('0.005'), Decimal('0.025'), Provider.ANTHROPIC),
+            'claude-opus-4-6': ModelPricing(Decimal('0.005'), Decimal('0.025'), Provider.ANTHROPIC),
+            'claude-sonnet-5': ModelPricing(Decimal('0.003'), Decimal('0.015'), Provider.ANTHROPIC),
+            'claude-sonnet-4-6': ModelPricing(Decimal('0.003'), Decimal('0.015'), Provider.ANTHROPIC),
+            'claude-haiku-4-5': ModelPricing(Decimal('0.001'), Decimal('0.005'), Provider.ANTHROPIC),
+            # Retired, retained for historical exports
             'claude-3-opus': ModelPricing(Decimal('0.015'), Decimal('0.075'), Provider.ANTHROPIC),
             'claude-3-opus-20240229': ModelPricing(Decimal('0.015'), Decimal('0.075'), Provider.ANTHROPIC),
             'claude-3-sonnet': ModelPricing(Decimal('0.003'), Decimal('0.015'), Provider.ANTHROPIC),
@@ -95,19 +150,41 @@ class OpenAIWasteAnalyzer:
             'claude-3-haiku-20240307': ModelPricing(Decimal('0.00025'), Decimal('0.00125'), Provider.ANTHROPIC),
             'claude-2.1': ModelPricing(Decimal('0.008'), Decimal('0.024'), Provider.ANTHROPIC),
             'claude-2': ModelPricing(Decimal('0.008'), Decimal('0.024'), Provider.ANTHROPIC),
-            
-            # Google Gemini
-            'gemini-pro': ModelPricing(Decimal('0.00025'), Decimal('0.0005'), Provider.GOOGLE),
-            'gemini-pro-vision': ModelPricing(Decimal('0.00025'), Decimal('0.0005'), Provider.GOOGLE),
+
+            # ---------------- Google Gemini ----------------
+            'gemini-3.7-flash': ModelPricing(Decimal('0.00075'), Decimal('0.00375'), Provider.GOOGLE),
+            'gemini-3.6-flash': ModelPricing(Decimal('0.00075'), Decimal('0.00375'), Provider.GOOGLE),
+            'gemini-3.5-flash': ModelPricing(Decimal('0.0015'), Decimal('0.009'), Provider.GOOGLE),
+            'gemini-3.5-flash-lite': ModelPricing(Decimal('0.0003'), Decimal('0.0025'), Provider.GOOGLE),
+            'gemini-3.1-pro-preview': ModelPricing(Decimal('0.002'), Decimal('0.012'), Provider.GOOGLE),
+            'gemini-3.1-flash-lite': ModelPricing(Decimal('0.00025'), Decimal('0.0015'), Provider.GOOGLE),
+            'gemini-2.5-pro': ModelPricing(Decimal('0.00125'), Decimal('0.010'), Provider.GOOGLE),
+            'gemini-2.5-flash': ModelPricing(Decimal('0.0003'), Decimal('0.0025'), Provider.GOOGLE),
+            'gemini-2.5-flash-lite': ModelPricing(Decimal('0.0001'), Decimal('0.0004'), Provider.GOOGLE),
+            # Retired, retained for historical exports
             'gemini-1.5-pro': ModelPricing(Decimal('0.00125'), Decimal('0.00375'), Provider.GOOGLE),
             'gemini-1.5-flash': ModelPricing(Decimal('0.000075'), Decimal('0.0003'), Provider.GOOGLE),
-            
-            # Azure OpenAI
-            'azure-gpt-4': ModelPricing(Decimal('0.03'), Decimal('0.06'), Provider.AZURE),
-            'azure-gpt-4-turbo': ModelPricing(Decimal('0.01'), Decimal('0.03'), Provider.AZURE),
+            'gemini-pro': ModelPricing(Decimal('0.00025'), Decimal('0.0005'), Provider.GOOGLE),
+            'gemini-pro-vision': ModelPricing(Decimal('0.00025'), Decimal('0.0005'), Provider.GOOGLE),
+
+            # ---------------- Azure OpenAI ----------------
+            # Azure bills the same list rates as OpenAI for the equivalent model, but
+            # reports names without dots, for example gpt-35-turbo.
+            'azure-gpt-5': ModelPricing(Decimal('0.00125'), Decimal('0.010'), Provider.AZURE),
+            'azure-gpt-5-mini': ModelPricing(Decimal('0.00025'), Decimal('0.002'), Provider.AZURE),
+            'azure-gpt-5-nano': ModelPricing(Decimal('0.00005'), Decimal('0.0004'), Provider.AZURE),
+            'azure-gpt-41': ModelPricing(Decimal('0.002'), Decimal('0.008'), Provider.AZURE),
+            'azure-gpt-41-mini': ModelPricing(Decimal('0.0004'), Decimal('0.0016'), Provider.AZURE),
+            'azure-gpt-4o': ModelPricing(Decimal('0.0025'), Decimal('0.010'), Provider.AZURE),
+            'azure-gpt-4o-mini': ModelPricing(Decimal('0.00015'), Decimal('0.0006'), Provider.AZURE),
+            'azure-o3': ModelPricing(Decimal('0.002'), Decimal('0.008'), Provider.AZURE),
+            'azure-o4-mini': ModelPricing(Decimal('0.0011'), Decimal('0.0044'), Provider.AZURE),
+            # Retired, retained for historical exports
+            'azure-gpt-4': ModelPricing(Decimal('0.030'), Decimal('0.060'), Provider.AZURE),
+            'azure-gpt-4-turbo': ModelPricing(Decimal('0.010'), Decimal('0.030'), Provider.AZURE),
             'azure-gpt-35-turbo': ModelPricing(Decimal('0.0005'), Decimal('0.0015'), Provider.AZURE),
         }
-    
+
     def _validate_tokens(self, value, field_name: str, row_index: int) -> int:
         """
         Validate token count with strict error handling
@@ -148,85 +225,73 @@ class OpenAIWasteAnalyzer:
         
         return tokens
     
+    # Suffixes providers append to a model name that never change the price.
+    _VERSION_SUFFIX = re.compile(
+        r"-(?:latest|preview|\d{8}|\d{4}-\d{2}-\d{2}|\d{4})$"
+    )
+
     def _normalize_model_name(self, model_name: str) -> str | None:
-        """
-        Normalize model name to canonical form with robust matching
-        
-        Handles version suffixes, case variations, and naming inconsistencies
-        
+        """Map a reported model name onto a key in the pricing table.
+
+        Matching is derived from the pricing table itself rather than a hardcoded
+        list, and candidates are tried longest first so that a more specific model
+        always wins. That ordering is the point: substring matching on shorter keys
+        made "gpt-4o" resolve to "gpt-4" and bill it at twelve times its real rate.
+
         Examples:
-            "gpt-4-0613" -> "gpt-4"
-            "GPT-4-Turbo-Preview" -> "gpt-4-turbo"
-            "claude-3-opus-20240229" -> "claude-3-opus"
-            "gemini-1.5-pro-latest" -> "gemini-1.5-pro"
+            "gpt-4o-2024-08-06"        -> "gpt-4o"
+            "gpt-4-0613"               -> "gpt-4"
+            "GPT-4o"                   -> "gpt-4o"
+            "claude-opus-5"            -> "claude-opus-5"
+            "claude-3-opus-20240229"   -> "claude-3-opus"
+            "gemini-2.5-pro-latest"    -> "gemini-2.5-pro"
+            "azure-gpt-35-turbo-16k"   -> "azure-gpt-35-turbo"
         """
-        # Use cache for performance
         if model_name in self.model_cache:
             return self.model_cache[model_name]
-        
+
         if not model_name:
             return None
-        
+
         model_lower = str(model_name).lower().strip()
-        
-        # OpenAI normalization (order matters: check specific first)
-        if 'gpt' in model_lower or 'davinci' in model_lower or 'text-' in model_lower:
-            for base_model in [
-                'gpt-4-turbo-preview', 'gpt-4-turbo', 'gpt-4',
-                'gpt-3.5-turbo-16k', 'gpt-3.5-turbo',
-                'text-davinci-003', 'text-davinci-002'
-            ]:
-                # Remove hyphens for flexible matching
-                base_normalized = base_model.replace('-', '').replace('.', '')
-                model_normalized = model_lower.replace('-', '').replace('.', '')
-                
-                if base_normalized in model_normalized:
-                    self.model_cache[model_name] = base_model
-                    return base_model
-        
-        # Anthropic normalization
-        if 'claude' in model_lower:
-            for base_model in [
-                'claude-3-opus-20240229', 'claude-3-opus',
-                'claude-3-sonnet-20240229', 'claude-3-sonnet',
-                'claude-3-haiku-20240307', 'claude-3-haiku',
-                'claude-2.1', 'claude-2', 'claude-instant'
-            ]:
-                base_normalized = base_model.replace('-', '').replace('.', '')
-                model_normalized = model_lower.replace('-', '').replace('.', '')
-                
-                if base_normalized in model_normalized:
-                    self.model_cache[model_name] = base_model
-                    return base_model
-        
-        # Google normalization
-        if 'gemini' in model_lower or 'palm' in model_lower or 'bison' in model_lower:
-            for base_model in [
-                'gemini-1.5-pro', 'gemini-1.5-flash',
-                'gemini-pro-vision', 'gemini-pro',
-                'palm-2'
-            ]:
-                base_normalized = base_model.replace('-', '').replace('.', '')
-                model_normalized = model_lower.replace('-', '').replace('.', '')
-                
-                if base_normalized in model_normalized:
-                    self.model_cache[model_name] = base_model
-                    return base_model
-        
-        # Azure normalization
-        if 'azure' in model_lower:
-            # Azure reports GPT-3.5 as 'gpt-35-turbo'; the pricing table is keyed the same way.
-            if '35' in model_lower:
-                self.model_cache[model_name] = 'azure-gpt-35-turbo'
-                return 'azure-gpt-35-turbo'
-            elif 'gpt4' in model_lower or 'gpt-4' in model_lower:
-                self.model_cache[model_name] = 'azure-gpt-4'
-                return 'azure-gpt-4'
-        
-        # No match found
-        self.model_cache[model_name] = model_lower
-        return model_lower
-    
+
+        def remember(value: str) -> str:
+            self.model_cache[model_name] = value
+            return value
+
+        # 1. Exact hit.
+        if model_lower in self.pricing:
+            return remember(model_lower)
+
+        # 2. Drop a trailing date or version stamp and retry.
+        stripped = self._VERSION_SUFFIX.sub("", model_lower)
+        while stripped != model_lower:
+            if stripped in self.pricing:
+                return remember(stripped)
+            model_lower, stripped = stripped, self._VERSION_SUFFIX.sub("", stripped)
+        if stripped in self.pricing:
+            return remember(stripped)
+
+        # 3. Longest matching prefix in the pricing table. The boundary check keeps
+        #    "gpt-4o" from being treated as a variant of "gpt-4".
+        for key in sorted(self.pricing, key=len, reverse=True):
+            if stripped == key or stripped.startswith(key + "-"):
+                return remember(key)
+
+        # 4. Azure deployments are frequently renamed by whoever created them, so
+        #    fall back to matching the underlying OpenAI model inside the name.
+        if "azure" in stripped:
+            azure_keys = sorted(
+                (k for k in self.pricing if k.startswith("azure-")), key=len, reverse=True
+            )
+            compact = stripped.replace("-", "").replace(".", "")
+            for key in azure_keys:
+                if key.replace("-", "").replace(".", "")[len("azure"):] in compact:
+                    return remember(key)
+
+        # Unrecognised. Returned as-is so the caller can flag it.
+        return remember(stripped)
+
     def _detect_provider(self, model_name: str) -> Provider:
         """Detect provider with comprehensive pattern matching"""
         if not model_name:
@@ -241,6 +306,10 @@ class OpenAIWasteAnalyzer:
         # OpenAI patterns
         openai_patterns = ['gpt-', 'gpt4', 'gpt3', 'gpt2', 'davinci', 'curie', 'babbage', 'ada', 'text-']
         if any(pattern in model_lower for pattern in openai_patterns):
+            return Provider.OPENAI
+
+        # Reasoning series: o1, o3, o4-mini and friends carry no 'gpt' prefix
+        if re.fullmatch(r'o\d+(?:-(?:mini|pro|preview))*', model_lower):
             return Provider.OPENAI
         
         # Anthropic patterns
@@ -670,3 +739,8 @@ YOUR COLUMNS: {', '.join(df.columns)}
                 })
         
         return recommendations
+
+
+# Retained for backwards compatibility. The class handles four providers and more than
+# waste analysis, so the old name was misleading; prefer CostAnalyzer in new code.
+OpenAIWasteAnalyzer = CostAnalyzer

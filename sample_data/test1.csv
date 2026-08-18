@@ -1,3 +1,0 @@
-model,prompt_tokens,completion_tokens
-gpt-4,100,50
-claude-3-opus,200,100

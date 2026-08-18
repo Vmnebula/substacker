@@ -1,5 +1,0 @@
-model,prompt_tokens,completion_tokens,prompt
-gpt-4,100,50,What is machine learning?
-gpt-4,120,60,Explain deep learning
-gpt-3.5-turbo,50,25,Summarize this article
-gpt-3.5-turbo,80,40,Translate to Spanish

@@ -1,6 +1,6 @@
 """
 Multi-Provider LLM Analyzer
-Enhanced wrapper for analyzer_v2 with additional multi-provider features.
+Enhanced wrapper for cost_analyzer with additional multi-provider features.
 """
 
 import logging
@@ -8,7 +8,7 @@ from typing import Any
 
 import pandas as pd
 
-from analyzer_v2 import OpenAIWasteAnalyzer
+from cost_analyzer import CostAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +16,11 @@ logger = logging.getLogger(__name__)
 class MultiProviderAnalyzer:
     """
     Enhanced analyzer with multi-provider comparison and optimization features.
-    Wraps OpenAIWasteAnalyzer to provide higher-level functionality.
+    Wraps CostAnalyzer to provide higher-level functionality.
     """
 
     def __init__(self):
-        self.base_analyzer = OpenAIWasteAnalyzer()
+        self.base_analyzer = CostAnalyzer()
         self.provider_stats = {}
 
     def get_all_provider_pricing(self) -> dict[str, Any]:

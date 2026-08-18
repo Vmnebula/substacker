@@ -1,3 +1,5 @@
 model,prompt_tokens,completion_tokens,team
-gpt-4,100,50,Marketing
-gpt-3.5-turbo,50,25,Engineering
+gpt-5,100,50,Marketing
+gpt-5-nano,50,25,Engineering
+claude-opus-5,200,100,Data Science
+gemini-3.7-flash,80,40,Product

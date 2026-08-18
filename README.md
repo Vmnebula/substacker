@@ -5,8 +5,10 @@ that caused it. It ingests provider usage exports or live SDK traffic, applies
 per-model token pricing, and reports where the money went, which spend was
 avoidable, and when a workload starts burning budget faster than it should.
 
-It supports OpenAI, Anthropic, Google Gemini, and Azure OpenAI, and runs as a
-single FastAPI service with either a zero-configuration SQLite database or Supabase.
+It covers OpenAI, Anthropic, Google Gemini, and Azure OpenAI, including the current
+GPT-5, Claude 5, and Gemini 3 families alongside retired models so historical exports
+still price correctly. It runs as a single FastAPI service backed by either a
+zero-configuration SQLite database or Supabase.
 
 [![CI](https://github.com/Vmnebula/substacker/actions/workflows/ci.yml/badge.svg)](https://github.com/Vmnebula/substacker/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -72,10 +74,10 @@ Substacker reads a CSV with one row per model invocation:
 
 ```csv
 model,prompt_tokens,completion_tokens,team
-gpt-4,150,250,marketing
-claude-3-opus,200,300,data_science
-gemini-pro,80,120,marketing
-azure-gpt-4-turbo,90,180,engineering
+gpt-5,150,250,marketing
+claude-opus-5,200,300,data_science
+gemini-3.7-flash,80,120,marketing
+azure-gpt-4o,90,180,engineering
 ```
 
 The provider is inferred from the model name, so a single file can mix providers.
@@ -89,8 +91,10 @@ A starter file is available at `GET /api/csv-template`, and sample datasets live
 `sample_data/`.
 
 Models that are not in the pricing table are recorded with a cost of zero and flagged
-in the response rather than silently priced wrong. Pricing lives in `analyzer_v2.py`
-and uses `Decimal` arithmetic throughout, so repeated aggregation does not drift.
+in the response rather than silently priced wrong. Pricing lives in `cost_analyzer.py`,
+was last verified against provider pricing pages on 2026-08-18, and uses `Decimal`
+arithmetic throughout so repeated aggregation does not drift. List prices only: batch
+and cached-input discounts are not modelled, so a real invoice is usually lower.
 
 ## Tracking live traffic with the SDK
 
@@ -111,7 +115,7 @@ client = track_openai(
 
 # Use the client exactly as before. Usage is reported in the background.
 response = client.chat.completions.create(
-    model="gpt-4o",
+    model="gpt-5",
     messages=[{"role": "user", "content": "Summarise this incident report."}],
 )
 ```
@@ -191,20 +195,20 @@ configured in `pyproject.toml`.
 
 ```
 app.py                       FastAPI application, routes, and startup wiring
-analyzer.py                  Waste pattern detection over usage data
-analyzer_v2.py               Model pricing tables and Decimal cost arithmetic
-analyzer_multi_provider.py   Provider detection and per-provider parsing
+cost_analyzer.py             Pricing tables, model matching, Decimal cost arithmetic
+analyzer_multi_provider.py   Higher-level multi-provider reporting over cost_analyzer
 anomaly_detector.py          Spend velocity and spike detection
 budget_enforcer.py           Per-team budget limits and policy checks
 auth.py, security.py         Sessions, API key issuance, and input validation
 database.py                  SQLite backend
 database_supabase.py         Supabase backend
+email_service.py             Report and alert delivery
 websocket_manager.py         Connection registry and event broadcasting
 substacker_sdk/              Python client library
 templates/, static/          Server-rendered dashboard
 tests/                       Test suite
 sample_data/                 Example CSV files
-docs/                        Architecture notes and diagrams
+docs/                        Documentation, see docs/README.md
 ```
 
 ## Contributing

@@ -1,7 +1,7 @@
 import hashlib
 
 from analyzer_multi_provider import MultiProviderAnalyzer
-from analyzer_v2 import OpenAIWasteAnalyzer
+from cost_analyzer import CostAnalyzer
 from security import InputValidator
 
 
@@ -30,7 +30,7 @@ def test_multi_provider_analyzer_pricing():
 
 def test_base_analyzer_cost_calculation():
     """Test pricing map on base analyzer."""
-    analyzer = OpenAIWasteAnalyzer()
+    analyzer = CostAnalyzer()
     assert 'gpt-4' in analyzer.pricing
     pricing = analyzer.pricing['gpt-4']
     assert pricing.input_price > 0

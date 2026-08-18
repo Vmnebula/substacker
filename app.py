@@ -30,8 +30,8 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from analyzer_v2 import OpenAIWasteAnalyzer  # Using production-grade v2 with all fixes
 from auth import create_access_token, get_password_hash, verify_password, verify_token
+from cost_analyzer import CostAnalyzer
 from database import Database
 from database_supabase import SupabaseDatabase
 from email_service import EmailService
@@ -67,7 +67,7 @@ db.init_admin_table()  # Initialize admin table
 db.init_api_keys_table()  # Initialize API keys table
 db.init_usage_logs_table()  # Initialize usage logs table
 email_service = EmailService()
-analyzer = OpenAIWasteAnalyzer()
+analyzer = CostAnalyzer()
 
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)
@@ -282,17 +282,17 @@ async def user_dashboard(request: Request):
 async def get_csv_template():
     """Download CSV template for analysis"""
     csv_content = """model,prompt_tokens,completion_tokens,team
-gpt-4,150,250,marketing
-gpt-4,120,200,marketing
-gpt-3.5-turbo,50,100,engineering
-gpt-3.5-turbo,75,150,engineering
-claude-3-opus,200,300,data_science
-claude-3-sonnet,100,150,data_science
-gemini-pro,80,120,marketing
-azure-gpt-4-turbo,90,180,engineering
-gpt-4,200,350,marketing
-gpt-3.5-turbo,40,80,engineering
-claude-3-haiku,30,60,data_science"""
+gpt-5,150,250,marketing
+gpt-5,120,200,marketing
+gpt-5-nano,50,100,engineering
+gpt-5-nano,75,150,engineering
+claude-opus-5,200,300,data_science
+claude-sonnet-5,100,150,data_science
+gemini-3.7-flash,80,120,marketing
+azure-gpt-4o,90,180,engineering
+gpt-5,200,350,marketing
+gpt-5-nano,40,80,engineering
+claude-haiku-4-5,30,60,data_science"""
 
     return Response(
         content=csv_content,
@@ -413,35 +413,35 @@ async def sample_analysis():
     # Create comprehensive sample data with realistic scenarios AND TEAM DATA
     sample_data = pd.DataFrame([
         # ===== MARKETING TEAM =====
-        {'prompt': 'Classify sentiment: "I love this product"', 'model': 'gpt-3.5-turbo', 'prompt_tokens': 8, 'completion_tokens': 2, 'team': 'marketing'},
-        {'prompt': 'Extract email: "Contact me at john@example.com"', 'model': 'gpt-3.5-turbo', 'prompt_tokens': 7, 'completion_tokens': 3, 'team': 'marketing'},
-        {'prompt': 'Translate to Spanish: "Hello world"', 'model': 'gpt-3.5-turbo', 'prompt_tokens': 6, 'completion_tokens': 5, 'team': 'marketing'},
-        {'prompt': 'Analyze market trends from Q1-Q4 2024 data and provide insights', 'model': 'gpt-4', 'prompt_tokens': 45, 'completion_tokens': 250, 'team': 'marketing'},
-        {'prompt': 'Generate comprehensive business strategy for SaaS company expansion', 'model': 'gpt-4', 'prompt_tokens': 32, 'completion_tokens': 180, 'team': 'marketing'},
-        {'prompt': 'What is machine learning?', 'model': 'gpt-4', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
-        {'prompt': 'What is machine learning?', 'model': 'gpt-4', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
-        {'prompt': 'What is machine learning?', 'model': 'gpt-4', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
+        {'prompt': 'Classify sentiment: "I love this product"', 'model': 'gpt-5-nano', 'prompt_tokens': 8, 'completion_tokens': 2, 'team': 'marketing'},
+        {'prompt': 'Extract email: "Contact me at john@example.com"', 'model': 'gpt-5-nano', 'prompt_tokens': 7, 'completion_tokens': 3, 'team': 'marketing'},
+        {'prompt': 'Translate to Spanish: "Hello world"', 'model': 'gpt-5-nano', 'prompt_tokens': 6, 'completion_tokens': 5, 'team': 'marketing'},
+        {'prompt': 'Analyze market trends from Q1-Q4 2024 data and provide insights', 'model': 'gpt-5', 'prompt_tokens': 45, 'completion_tokens': 250, 'team': 'marketing'},
+        {'prompt': 'Generate comprehensive business strategy for SaaS company expansion', 'model': 'gpt-5', 'prompt_tokens': 32, 'completion_tokens': 180, 'team': 'marketing'},
+        {'prompt': 'What is machine learning?', 'model': 'gpt-5', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
+        {'prompt': 'What is machine learning?', 'model': 'gpt-5', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
+        {'prompt': 'What is machine learning?', 'model': 'gpt-5', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
         
         # ===== ENGINEERING TEAM =====
-        {'prompt': 'Extract the name from: John Smith', 'model': 'gpt-4', 'prompt_tokens': 15, 'completion_tokens': 5, 'team': 'engineering'},
-        {'prompt': 'Is this positive? Great product!', 'model': 'gpt-4', 'prompt_tokens': 12, 'completion_tokens': 3, 'team': 'engineering'},
-        {'prompt': 'Count words in text: "Hello world test"', 'model': 'gpt-4', 'prompt_tokens': 10, 'completion_tokens': 2, 'team': 'engineering'},
-        {'prompt': 'Format date: 2024-01-15 to MM/DD/YYYY', 'model': 'gpt-4', 'prompt_tokens': 9, 'completion_tokens': 2, 'team': 'engineering'},
-        {'prompt': 'Summarize article about AI trends', 'model': 'gpt-4', 'prompt_tokens': 28, 'completion_tokens': 120, 'team': 'engineering'},
-        {'prompt': 'Debug Python code: def func(x): return x*2', 'model': 'gpt-4', 'prompt_tokens': 18, 'completion_tokens': 95, 'team': 'engineering'},
+        {'prompt': 'Extract the name from: John Smith', 'model': 'gpt-5', 'prompt_tokens': 15, 'completion_tokens': 5, 'team': 'engineering'},
+        {'prompt': 'Is this positive? Great product!', 'model': 'gpt-5', 'prompt_tokens': 12, 'completion_tokens': 3, 'team': 'engineering'},
+        {'prompt': 'Count words in text: "Hello world test"', 'model': 'gpt-5', 'prompt_tokens': 10, 'completion_tokens': 2, 'team': 'engineering'},
+        {'prompt': 'Format date: 2024-01-15 to MM/DD/YYYY', 'model': 'gpt-5', 'prompt_tokens': 9, 'completion_tokens': 2, 'team': 'engineering'},
+        {'prompt': 'Summarize article about AI trends', 'model': 'gpt-5', 'prompt_tokens': 28, 'completion_tokens': 120, 'team': 'engineering'},
+        {'prompt': 'Debug Python code: def func(x): return x*2', 'model': 'gpt-5', 'prompt_tokens': 18, 'completion_tokens': 95, 'team': 'engineering'},
         
         # ===== DATA SCIENCE TEAM =====
-        {'prompt': 'Hello', 'system_prompt': 'You are a helpful assistant. ' * 150, 'model': 'gpt-3.5-turbo', 'prompt_tokens': 750, 'completion_tokens': 50, 'team': 'data_science'},
-        {'prompt': 'Hi', 'system_prompt': 'You are a helpful assistant. ' * 150, 'model': 'gpt-3.5-turbo', 'prompt_tokens': 750, 'completion_tokens': 45, 'team': 'data_science'},
-        {'prompt': 'Generate JSON schema for user database', 'model': 'gpt-3.5-turbo', 'prompt_tokens': 22, 'completion_tokens': 85, 'team': 'data_science'},
-        {'prompt': 'Explain quantum computing basics', 'model': 'gpt-3.5-turbo', 'prompt_tokens': 15, 'completion_tokens': 110, 'team': 'data_science'},
+        {'prompt': 'Hello', 'system_prompt': 'You are a helpful assistant. ' * 150, 'model': 'gpt-5-nano', 'prompt_tokens': 750, 'completion_tokens': 50, 'team': 'data_science'},
+        {'prompt': 'Hi', 'system_prompt': 'You are a helpful assistant. ' * 150, 'model': 'gpt-5-nano', 'prompt_tokens': 750, 'completion_tokens': 45, 'team': 'data_science'},
+        {'prompt': 'Generate JSON schema for user database', 'model': 'gpt-5-nano', 'prompt_tokens': 22, 'completion_tokens': 85, 'team': 'data_science'},
+        {'prompt': 'Explain quantum computing basics', 'model': 'gpt-5-nano', 'prompt_tokens': 15, 'completion_tokens': 110, 'team': 'data_science'},
         
         # ===== REPEAT FOR SCALE =====
-        {'prompt': 'What is machine learning?', 'model': 'gpt-4', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
-        {'prompt': 'What is machine learning?', 'model': 'gpt-4', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
+        {'prompt': 'What is machine learning?', 'model': 'gpt-5', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
+        {'prompt': 'What is machine learning?', 'model': 'gpt-5', 'prompt_tokens': 20, 'completion_tokens': 150, 'team': 'marketing'},
     ] * 12)  # Multiply to show monthly impact and scale
     
-    analyzer = OpenAIWasteAnalyzer()
+    analyzer = CostAnalyzer()
     results = analyzer.analyze_usage(sample_data)
     
     return JSONResponse(content=results)
@@ -736,7 +736,7 @@ async def track_usage(request: Request, user_email: str = Depends(verify_api_key
             )
         
         # Calculate cost using analyzer pricing (multi-provider support)
-        analyzer_instance = OpenAIWasteAnalyzer()
+        analyzer_instance = CostAnalyzer()
         
         # Get pricing for the model
         pricing, is_known = analyzer_instance._get_model_pricing(model)
