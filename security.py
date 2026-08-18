@@ -243,9 +243,13 @@ class SecurityHeaders:
         #     www.clarity.ms, so every analytics event was refused.
         #   - dev_docs loads highlight.js from cdnjs, which was allowed for styles and
         #     fonts but not for scripts, so code samples were never highlighted.
+        #   - Cloudflare injects its Web Analytics beacon at the edge. It only appears
+        #     on the proxied production site, never locally, so the block was invisible
+        #     in development while the analytics silently collected nothing.
         'Content-Security-Policy': (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://*.clarity.ms https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; "
+            "script-src 'self' 'unsafe-inline' https://*.clarity.ms https://cdn.jsdelivr.net "
+            "https://cdnjs.cloudflare.com https://static.cloudflareinsights.com; "
             "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; "
             "font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
@@ -253,7 +257,8 @@ class SecurityHeaders:
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self'; "
-            "connect-src 'self' https://*.clarity.ms https://cdn.jsdelivr.net"
+            "connect-src 'self' https://*.clarity.ms https://cdn.jsdelivr.net "
+            "https://cloudflareinsights.com"
         ),
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'geolocation=(), microphone=(), camera=()'

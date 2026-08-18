@@ -48,10 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and demo buttons off screen. `minmax(250px, 1fr)` sets a 250px floor per track and
   `auto-fit` only collapses empty tracks, so three buttons forced a 790px minimum.
   The CSV guide's navbar and the developer docs' tables overflowed the same way.
-- The Content Security Policy blocked two things the pages depend on. Analytics
+- The Content Security Policy blocked three things the pages depend on. Cloudflare
+  injects its Web Analytics beacon at the edge, so it appears only on the proxied
+  production site and never locally: the block was invisible in development while the
+  analytics collected nothing. Analytics
   beacons post to regional Clarity shards rather than `www.clarity.ms`, so every event
   was refused, and the syntax highlighter on the developer docs loads from cdnjs,
   which was permitted for styles but not scripts.
+- `FRONTEND_TEST_URL` points the browser suite at a deployed site, so a post-deploy
+  run catches edge-injected resources that a local run cannot see.
 - `og:image` referenced a file that was never created and used a relative path, which
   scrapers ignore. Link previews therefore rendered without an image anywhere.
 - 33 WCAG 2.1 AA colour contrast failures across six pages, ranging from 1.79:1 to

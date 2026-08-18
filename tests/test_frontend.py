@@ -36,7 +36,20 @@ def _free_port():
 
 @pytest.fixture(scope="module")
 def server(tmp_path_factory):
-    """Run the real application; TestClient does not execute CSP or layout."""
+    """Run the real application; TestClient does not execute CSP or layout.
+
+    Set FRONTEND_TEST_URL to run these checks against a deployed site instead. That
+    matters because some failures only exist in production: the CDN in front of the
+    site injects its own analytics beacon, which the Content Security Policy blocked
+    while every local run looked clean.
+    """
+    import os
+
+    deployed = os.getenv("FRONTEND_TEST_URL")
+    if deployed:
+        yield deployed.rstrip("/")
+        return
+
     port = _free_port()
     workdir = tmp_path_factory.mktemp("run")
     env = {
