@@ -1,12 +1,24 @@
-"""
-OpenAI client wrapper that tracks API usage in real-time
+"""OpenAI client wrapper that reports token usage to Substacker.
+
+Usage is reported from a small background thread pool so that tracking never adds
+latency to, or raises out of, the caller's OpenAI request.
 """
 
+import atexit
+import logging
 import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+
 import requests
-from typing import Optional, Any
-from datetime import datetime
 import tiktoken
+
+logger = logging.getLogger(__name__)
+
+# Reporting is fire-and-forget. A single worker keeps ordering stable and bounds the
+# number of sockets the SDK opens on behalf of the host application.
+_REPORTER = ThreadPoolExecutor(max_workers=1, thread_name_prefix="substacker-reporter")
+atexit.register(_REPORTER.shutdown, wait=True)
 
 
 class SubstackerTracker:
@@ -33,7 +45,7 @@ class SubstackerTracker:
         if self._encoding is None:
             try:
                 self._encoding = tiktoken.encoding_for_model(model)
-            except:
+            except Exception:
                 self._encoding = tiktoken.get_encoding("cl100k_base")
         return self._encoding
     
@@ -42,12 +54,18 @@ class SubstackerTracker:
         try:
             encoding = self._get_encoding(model)
             return len(encoding.encode(text))
-        except:
+        except Exception:
             # Fallback: rough estimate (1 token ~= 4 chars)
             return len(text) // 4
     
     def _track_usage(self, model: str, prompt_tokens: int, completion_tokens: int, response_time: float):
-        """Send usage data to Substacker API"""
+        """Queue usage data for reporting without blocking the caller."""
+        _REPORTER.submit(
+            self._post_usage, model, prompt_tokens, completion_tokens, response_time
+        )
+
+    def _post_usage(self, model: str, prompt_tokens: int, completion_tokens: int, response_time: float):
+        """Send usage data to the Substacker API. Runs on the reporter thread."""
         try:
             payload = {
                 # Keep api_key in payload for backwards compatibility but also send as header
@@ -57,10 +75,9 @@ class SubstackerTracker:
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": completion_tokens,
                 "response_time": response_time,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            # Send to Substacker API (async, don't block on failure)
             headers = {"X-API-Key": self._substacker_key}
             response = requests.post(
                 self._endpoint,
@@ -70,11 +87,17 @@ class SubstackerTracker:
             )
             
             if response.status_code != 200:
-                print(f"Substacker tracking warning: {response.status_code}")
-                
-        except Exception as e:
-            # Silently fail - don't break user's app if tracking fails
-            print(f"Substacker tracking error: {e}")
+                logger.warning(
+                    "Substacker rejected a usage report: HTTP %s", response.status_code
+                )
+
+        except requests.RequestException as exc:
+            # Expected in the field: collector down, slow, or unreachable.
+            logger.warning("Substacker usage report failed: %s", exc)
+
+        except Exception:
+            # Never let an unexpected tracking failure surface in the host application.
+            logger.warning("Substacker usage report failed unexpectedly", exc_info=True)
     
     def __getattr__(self, name):
         """Proxy all attributes to underlying OpenAI client"""
