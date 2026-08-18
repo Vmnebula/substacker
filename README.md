@@ -1,166 +1,223 @@
-# Substacker — Open Source AI Cost Intelligence & FinOps Platform
+# Substacker
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688.svg)](https://fastapi.tiangolo.com)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+Substacker attributes large language model spend to the teams, projects, and models
+that caused it. It ingests provider usage exports or live SDK traffic, applies
+per-model token pricing, and reports where the money went, which spend was
+avoidable, and when a workload starts burning budget faster than it should.
 
-> **"Your AI bill is $47,000. Who spent it?"**  
-> Substacker is a high-throughput, multi-tenant AI cost attribution engine and observability platform. It ingests token-level spend across OpenAI, Anthropic, Google Vertex/Gemini, and Azure OpenAI, attributing costs directly to teams, models, environments, and projects in real time.
+It supports OpenAI, Anthropic, Google Gemini, and Azure OpenAI, and runs as a
+single FastAPI service with either a zero-configuration SQLite database or Supabase.
 
----
+[![CI](https://github.com/Vmnebula/substacker/actions/workflows/ci.yml/badge.svg)](https://github.com/Vmnebula/substacker/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 
-## 🎬 Product Demo
+![Substacker dashboard](docs/assets/demo.gif)
 
-![Substacker Demo](docs/assets/demo.gif)
+## Contents
 
----
+- [Why](#why)
+- [Quick start](#quick-start)
+- [Importing usage data](#importing-usage-data)
+- [Tracking live traffic with the SDK](#tracking-live-traffic-with-the-sdk)
+- [Configuration](#configuration)
+- [HTTP API](#http-api)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Project layout](#project-layout)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
-## 🏛️ System Architecture
+## Why
 
-```mermaid
-graph TD
-    A[Client App / LLM Requests] -->|Python SDK / REST| B[Substacker API / FastAPI Gateway]
-    C[Usage CSV Exports] -->|Batch Ingest| B
-    B --> D[Multi-Provider Ingestion Engine]
-    D -->|Cost & Token Math| E[Cost Engine & Anomaly Detector]
-    E --> F[(Database: SQLite / Supabase)]
-    E --> G[WebSocket Stream Manager]
-    G -->|Live Metrics| H[Real-Time Admin Dashboard]
-    E --> I[Budget & Policy Enforcer]
-    I -->|Alerts & Webhooks| J[Email / Notification Service]
-```
+Provider billing dashboards report a single number for an entire organisation. They
+cannot answer the question that matters after the invoice arrives: which team, which
+service, and which model produced the spend.
 
----
+Substacker answers that by attributing every request to a team and a model, and by
+reporting three things on top of the raw totals:
 
-## ✨ Key Features
+- **Attribution.** Cost per team, model, and project, from CSV exports or live traffic.
+- **Waste analysis.** Duplicate prompts, oversized system prompts, and requests routed
+  to a more expensive model than the workload requires.
+- **Anomaly detection.** Velocity checks that flag runaway agent loops before they
+  land on the next invoice.
 
-- 🎯 **Team-Level Cost Attribution:** Map AI token usage and costs directly to departments (Engineering, Growth, Data, Product).
-- 🔌 **Universal Multi-Provider Support:** Native cost models and parsers for:
-  - **OpenAI** (GPT-4o, GPT-4 Turbo, GPT-3.5, Embeddings)
-  - **Anthropic** (Claude 3.5 Sonnet, Claude 3 Opus, Haiku)
-  - **Google Gemini** (Gemini 1.5 Pro, Flash, Vertex AI)
-  - **Azure OpenAI**
-- 🐍 **Lightweight Python SDK:** Drop-in context manager and decorators to track live API calls without adding request latency.
-- ⚡ **Real-Time Observability:** WebSockets push live token throughput and financial burn directly to an analytics dashboard.
-- 🛡️ **Budget Enforcement & Anomaly Detection:** Real-time velocity monitoring flags runaway agent loops and spikes before bills explode.
-- 🗄️ **Dual Database Layer:** Seamlessly switches between local zero-config SQLite and scalable cloud Supabase (PostgreSQL).
+## Quick start
 
----
-
-## 📁 Repository Structure
-
-```
-├── app.py                      # FastAPI core application & API gateway
-├── analyzer_multi_provider.py  # Multi-provider cost engine wrapper
-├── analyzer_v2.py              # Decimal-precision token & pricing math
-├── anomaly_detector.py         # Anomaly detection for token burn spikes
-├── budget_enforcer.py          # Real-time team budget limits & policies
-├── websocket_manager.py        # Real-time WebSocket connection manager
-├── substacker_sdk/             # Python client library for applications
-├── docs/                       # Architecture diagrams, specifications, assets
-│   ├── architecture/           # Data flows and network diagrams
-│   └── assets/                 # Product demo GIF & UI illustrations
-├── sample_data/                # Sample CSV datasets for testing imports
-├── tests/                      # Pytest automated test suite
-└── templates/                  # Frontend UI templates
-```
-
----
-
-## 🚀 Quickstart
-
-### 1. Prerequisites
-- Python 3.10+
-- `pip` or `uv`
-
-### 2. Installation & Setup
+Requires Python 3.10 or newer.
 
 ```bash
 git clone https://github.com/Vmnebula/substacker.git
 cd substacker
 
-# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Configure Environment
-
-Copy the example environment file and set your `SECRET_KEY`:
-
-```bash
 cp .env.example .env
-```
-
-Generate a secure secret key:
-```bash
 python3 -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))" >> .env
+
+uvicorn app:app --reload
 ```
 
-### 4. Run Locally
+Open <http://localhost:8000>. The default configuration writes to a local SQLite file
+and needs no external services. A hosted instance runs at
+<https://substacker.vmnebula.com>.
+
+## Importing usage data
+
+Substacker reads a CSV with one row per model invocation:
+
+```csv
+model,prompt_tokens,completion_tokens,team
+gpt-4,150,250,marketing
+claude-3-opus,200,300,data_science
+gemini-pro,80,120,marketing
+azure-gpt-4-turbo,90,180,engineering
+```
+
+The provider is inferred from the model name, so a single file can mix providers.
+Upload it from the analyzer page, or post it directly:
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+curl -X POST http://localhost:8000/analyze -F "file=@usage.csv"
 ```
 
-Visit the dashboard at `http://localhost:8000`.
+A starter file is available at `GET /api/csv-template`, and sample datasets live in
+`sample_data/`.
 
----
+Models that are not in the pricing table are recorded with a cost of zero and flagged
+in the response rather than silently priced wrong. Pricing lives in `analyzer_v2.py`
+and uses `Decimal` arithmetic throughout, so repeated aggregation does not drift.
 
-## 🧪 Running Tests
+## Tracking live traffic with the SDK
 
-Substacker includes test coverage for multi-provider cost calculations, API key verification, and security middleware:
-
-```bash
-pytest
-```
-
----
-
-## 📦 Using the Python SDK
-
-Track LLM invocations in your own applications:
+The Python SDK wraps an existing OpenAI client and reports usage after each call.
+Generate an API key from the admin dashboard, then:
 
 ```python
-from substacker_sdk import SubstackerClient
+from openai import OpenAI
 
-client = SubstackerClient(
-    api_key="***",
-    endpoint="http://localhost:8000"
+from substacker_sdk import track_openai
+
+client = track_openai(
+    OpenAI(),
+    api_key="sk_substacker_...",
+    team="engineering",
+    endpoint="http://localhost:8000/api/track",
 )
 
-# Track an LLM interaction
-client.track_usage(
-    provider="openai",
+# Use the client exactly as before. Usage is reported in the background.
+response = client.chat.completions.create(
     model="gpt-4o",
-    team="engineering",
-    prompt_tokens=1250,
-    completion_tokens=320,
-    cost=0.0157,
-    project="autonomous-agent-v2"
+    messages=[{"role": "user", "content": "Summarise this incident report."}],
 )
 ```
 
----
+Token counts come from the provider response when present, and fall back to a
+`tiktoken` estimate otherwise. Install the SDK on its own with
+`pip install ./substacker_sdk`.
 
-## 🤝 Contributing
+## Configuration
 
-We welcome contributions from the developer and FinOps community!
+Configuration is read from the environment, or from a `.env` file in the project root.
+Copy `.env.example` to get started.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+| Variable | Default | Description |
+| --- | --- | --- |
+| `SECRET_KEY` | none | Required. Signs session cookies and tokens. Use at least 32 random characters. |
+| `DATABASE_TYPE` | `sqlite` | Storage backend. `sqlite` needs no setup; `supabase` requires the two variables below. |
+| `SUPABASE_URL` | none | Project URL, required when `DATABASE_TYPE=supabase`. |
+| `SUPABASE_KEY` | none | Service key, required when `DATABASE_TYPE=supabase`. |
+| `BASE_URL` | `http://localhost:8000` | Public URL used in generated links and emails. |
+| `ENVIRONMENT` | `development` | Set to `production` to enable stricter cookie and CSRF handling. |
+| `JWT_EXPIRATION` | `3600` | Session lifetime in seconds. |
+| `MAX_FILE_SIZE` | `10485760` | Largest accepted upload, in bytes. |
+| `MAX_FILE_ROWS` | `10000` | Largest accepted row count per upload. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | none | Optional. Email delivery for reports and alerts; disabled when unset. |
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines.
+Provider API keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and the rest) are only needed
+if you pull usage from a provider directly. CSV import and SDK tracking do not require them.
 
----
+## HTTP API
 
-## 📄 License
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/health` | none | Service and database health. |
+| `POST` | `/analyze` | none | Upload a usage CSV and receive a cost and waste breakdown. |
+| `GET` | `/api/csv-template` | none | Download a template CSV. |
+| `POST` | `/api/track` | API key | Record a single model invocation. Used by the SDK. |
+| `GET` | `/api/costs/by-team` | API key | Cost totals grouped by team. |
+| `GET` | `/api/dashboard/realtime` | API key | Current totals and recent activity. |
+| `GET` | `/export/csv` | session | Export stored analysis results. |
+| `WS` | `/ws` | API key | Live cost and token stream. |
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+Interactive documentation is served at `/docs` when the application is running.
+Uploads are rate limited to 10 per minute and tracking calls to 1000 per minute.
+
+## Architecture
+
+```mermaid
+graph TD
+    A[Application code] -->|Python SDK| B[FastAPI service]
+    C[Provider usage CSV] -->|Upload| B
+    B --> D[Provider detection and pricing]
+    D --> E[Cost engine, Decimal arithmetic]
+    E --> F[Waste analysis]
+    E --> G[Anomaly detection]
+    E --> H[(SQLite or Supabase)]
+    E --> I[WebSocket broadcaster]
+    I --> J[Dashboard]
+    G --> K[Budget enforcement and alerts]
+```
+
+## Development
+
+```bash
+pip install -r requirements.txt
+pip install pytest pytest-cov ruff
+
+pytest                 # test suite
+ruff check .           # lint
+```
+
+Lint and tests run on every push and pull request across Python 3.10 through 3.13,
+alongside a check that the application boots with the default configuration. Rules are
+configured in `pyproject.toml`.
+
+## Project layout
+
+```
+app.py                       FastAPI application, routes, and startup wiring
+analyzer.py                  Waste pattern detection over usage data
+analyzer_v2.py               Model pricing tables and Decimal cost arithmetic
+analyzer_multi_provider.py   Provider detection and per-provider parsing
+anomaly_detector.py          Spend velocity and spike detection
+budget_enforcer.py           Per-team budget limits and policy checks
+auth.py, security.py         Sessions, API key issuance, and input validation
+database.py                  SQLite backend
+database_supabase.py         Supabase backend
+websocket_manager.py         Connection registry and event broadcasting
+substacker_sdk/              Python client library
+templates/, static/          Server-rendered dashboard
+tests/                       Test suite
+sample_data/                 Example CSV files
+docs/                        Architecture notes and diagrams
+```
+
+## Contributing
+
+Bug reports, provider adapters, and SDK ports are all welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations.
+
+## Security
+
+Report vulnerabilities privately through the repository's Security tab rather than as a
+public issue. See [SECURITY.md](SECURITY.md).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
