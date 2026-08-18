@@ -1,0 +1,60 @@
+name: Bug report
+description: Report behaviour that does not match the documentation
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include API keys, tokens, or customer data in this report.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened
+      description: Describe the behaviour you observed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Describe what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: A minimal sequence of commands or requests that triggers the problem.
+      placeholder: |
+        1. Configure ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or traceback
+      description: Paste any relevant output. It is rendered as code, no backticks needed.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The release tag or commit SHA you are running.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, runtime version, and deployment target.
+      placeholder: macOS 15, Python 3.12, local
+    validations:
+      required: true
