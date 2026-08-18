@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "substacker-sdk"
+version = "0.1.0"
+description = "Python client for Substacker: report LLM token usage and cost for attribution"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{ name = "Substacker maintainers" }]
+keywords = ["llm", "openai", "finops", "cost-tracking", "observability"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "openai>=1.0.0",
+    "requests>=2.25.0",
+    "tiktoken>=0.5.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "ruff>=0.6.0"]
+
+[project.urls]
+Homepage = "https://github.com/Vmnebula/substacker"
+Source = "https://github.com/Vmnebula/substacker"
+Issues = "https://github.com/Vmnebula/substacker/issues"
+
+[tool.setuptools]
+packages = ["substacker_sdk"]
+
+[tool.setuptools.package-dir]
+substacker_sdk = "."

@@ -1,25 +1,44 @@
-from fastapi import FastAPI, File, UploadFile, Request, Form, BackgroundTasks, Response, Depends, HTTPException, Cookie, Header, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-import pandas as pd
+import hashlib
 import io
 import json
 import logging
+import os
+import time
 from datetime import datetime
+
+import pandas as pd
+import uvicorn
+from fastapi import (
+    BackgroundTasks,
+    Cookie,
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 from analyzer_v2 import OpenAIWasteAnalyzer  # Using production-grade v2 with all fixes
+from auth import create_access_token, get_password_hash, verify_password, verify_token
+from database import Database
 from database_supabase import SupabaseDatabase
 from email_service import EmailService
-from auth import verify_password, create_access_token, verify_token, get_password_hash
-from security import SecurityConfig, InputValidator, FileValidator, CSRFProtection, SecurityHeaders
-from websocket_manager import ws_manager, EventType, broadcast_cost_update, broadcast_analysis_complete, broadcast_anomaly
-import uvicorn
-from typing import Optional, Generator
-import os
-import hashlib
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+from security import FileValidator, InputValidator, SecurityConfig, SecurityHeaders
+from websocket_manager import (
+    ws_manager,
+)
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -30,7 +49,20 @@ app.mount("/sample_data", StaticFiles(directory="sample_data"), name="sample_dat
 templates = Jinja2Templates(directory="templates")
 
 # Initialize services
-db = SupabaseDatabase()
+# DATABASE_TYPE selects the storage backend. "sqlite" needs no configuration and is
+# the default for local development; "supabase" requires SUPABASE_URL and SUPABASE_KEY.
+DATABASE_TYPE = os.getenv("DATABASE_TYPE", "sqlite").strip().lower()
+if DATABASE_TYPE == "supabase":
+    db = SupabaseDatabase()
+elif DATABASE_TYPE == "sqlite":
+    db = Database()
+    db.init_database()
+else:
+    raise ValueError(
+        f"Unsupported DATABASE_TYPE {DATABASE_TYPE!r}. Expected 'sqlite' or 'supabase'."
+    )
+logger.info("Using %s database backend", DATABASE_TYPE)
+
 db.init_admin_table()  # Initialize admin table
 db.init_api_keys_table()  # Initialize API keys table
 db.init_usage_logs_table()  # Initialize usage logs table
@@ -46,7 +78,7 @@ app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
 ))
 
 # Request timing middleware for monitoring
-import time
+
 
 @app.middleware("http")
 async def log_request_timing(request: Request, call_next):
@@ -75,7 +107,7 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 # Helper function to verify admin token
-async def verify_admin(authorization: Optional[str] = None, admin_token: Optional[str] = Cookie(None)):
+async def verify_admin(authorization: str | None = None, admin_token: str | None = Cookie(None)):
     """Verify admin authentication"""
     token = authorization.replace("Bearer ", "") if authorization else admin_token
     if not token:
@@ -111,7 +143,7 @@ async def health_check():
         }, 500
 
 # Helper function to verify API key for SDK endpoints
-async def verify_api_key(x_api_key: Optional[str] = Header(None)):
+async def verify_api_key(x_api_key: str | None = Header(None)):
     """Verify API key for SDK authentication"""
     if not x_api_key:
         raise HTTPException(status_code=401, detail="API key required. Include X-API-Key header.")
@@ -165,7 +197,7 @@ async def capture_lead(
         user_agent = request.headers.get('user-agent', '')
         
         # Save lead to database
-        lead_id = db.add_lead(
+        db.add_lead(
             email=email,
             source='landing_page',
             ip_address=client_ip,
@@ -269,7 +301,7 @@ claude-3-haiku,30,60,data_science"""
     )
 
 @app.get("/analyzer", response_class=HTMLResponse)
-async def analyzer_page(request: Request, email: Optional[str] = None):
+async def analyzer_page(request: Request, email: str | None = None):
     """The actual analyzer tool (after email capture)"""
     
     if email:
@@ -287,7 +319,7 @@ async def analyze_usage(
     request: Request,
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    email: Optional[str] = Form(None)
+    email: str | None = Form(None)
 ):
     """Analyze OpenAI usage with file validation and rate limiting"""
     
@@ -513,7 +545,7 @@ async def admin_setup(email: str = Form(...), password: str = Form(...)):
         )
 
 @app.get("/api/costs/by-team")
-async def get_costs_by_team(email: Optional[str] = None):
+async def get_costs_by_team(email: str | None = None):
     """Get cost breakdown by team for an analysis"""
     try:
         if not email:
@@ -555,15 +587,11 @@ async def get_costs_by_team(email: Optional[str] = None):
         )
 
 @app.get("/export/csv")
-async def export_csv(email: Optional[str] = None, admin_email: str = Depends(verify_admin)):
+async def export_csv(email: str | None = None, admin_email: str = Depends(verify_admin)):
     """Export analysis results as CSV"""
     
     try:
         # Get results from database
-        if email:
-            # Get specific lead's results
-            lead = db.get_admin_by_email(email) if email else None
-        
         # Create CSV in memory
         output = io.StringIO()
         output.write("Lead Email,Total Cost,Waste Amount,Savings %,Patterns,Timestamp\n")
@@ -597,8 +625,8 @@ async def tracking_pixel(email: str):
 @app.post("/api/generate-key")
 async def generate_api_key(email: str = Form(...)):
     """Generate new API key for SDK integration"""
-    import secrets
     import hashlib
+    import secrets
     
     try:
         # Validate email format
@@ -698,7 +726,7 @@ async def track_usage(request: Request, user_email: str = Depends(verify_api_key
         prompt_tokens = data.get('prompt_tokens', 0)
         completion_tokens = data.get('completion_tokens', 0)
         response_time = data.get('response_time', 0)
-        provider = data.get('provider', 'openai')  # NEW: Support multi-provider
+        # `provider` may be supplied by the SDK but is derived from the model name below.
         
         # Validate required fields
         if not all([team, model]):
@@ -792,7 +820,7 @@ async def realtime_dashboard(user_email: str = Depends(verify_api_key)):
 # ===== PHASE 3: REAL-TIME ANALYTICS =====
 
 @app.get("/realtime", response_class=HTMLResponse)
-async def realtime_dashboard(request: Request):
+async def realtime_dashboard_page(request: Request):
     """Real-time cost tracking dashboard with WebSocket"""
     return templates.TemplateResponse("realtime.html", {"request": request})
 
