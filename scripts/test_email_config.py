@@ -5,8 +5,9 @@ Run locally to verify all email settings are correct
 """
 
 import os
-import socket
 import smtplib
+import socket
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -50,10 +51,10 @@ for key, value in variables.items():
 print()
 print("📋 DEFAULTS USED IF NOT SET:")
 print("-" * 60)
-print(f"SMTP_HOST defaults to:  smtp.gmail.com")
-print(f"SMTP_PORT defaults to:  587")
-print(f"FROM_NAME defaults to:  Substacker")
-print(f"FROM_EMAIL defaults to: SMTP_USER value")
+print("SMTP_HOST defaults to:  smtp.gmail.com")
+print("SMTP_PORT defaults to:  587")
+print("FROM_NAME defaults to:  Substacker")
+print("FROM_EMAIL defaults to: SMTP_USER value")
 
 print()
 print("🔍 VALIDATION:")
@@ -110,19 +111,19 @@ if smtp_user and smtp_pass:
                 print(f"✅ Port {smtp_port} is open")
             else:
                 print(f"❌ Port {smtp_port} is blocked or unreachable")
-                print(f"   This is why emails are failing!")
-                print(f"   🔧 FIX: Switch to Gmail SMTP (smtp.gmail.com)")
-        except socket.timeout:
+                print("   This is why emails are failing!")
+                print("   🔧 FIX: Switch to Gmail SMTP (smtp.gmail.com)")
+        except TimeoutError:
             print(f"❌ Connection timeout to port {smtp_port}")
-            print(f"   🚨 RAILWAY IS BLOCKING THIS PORT")
-            print(f"   🔧 FIX: Use smtp.gmail.com instead")
+            print("   🚨 RAILWAY IS BLOCKING THIS PORT")
+            print("   🔧 FIX: Use smtp.gmail.com instead")
         except Exception as e:
             print(f"❌ Port test failed: {e}")
     
     # Test 3: SMTP Connection
     if smtp_host:
         try:
-            print(f"[3/4] Connecting to SMTP server...")
+            print("[3/4] Connecting to SMTP server...")
             with smtplib.SMTP(smtp_host, int(smtp_port), timeout=15) as server:
                 print("✅ Connected!")
                 
@@ -145,20 +146,20 @@ if smtp_user and smtp_pass:
                 print("   📧 Gmail: Use app-specific password from myaccount.google.com/apppasswords")
         except smtplib.SMTPException as e:
             print(f"❌ SMTP error: {e}")
-        except (socket.timeout, TimeoutError) as e:
+        except TimeoutError as e:
             print(f"❌ Connection timeout: {e}")
             print(f"   🚨 {smtp_host}:{smtp_port} is not reachable")
-            print(f"   🔧 CRITICAL: Railway is blocking your SMTP server")
+            print("   🔧 CRITICAL: Railway is blocking your SMTP server")
             print()
-            print(f"   ⚡ IMMEDIATE SOLUTION:")
-            print(f"   Update Railway variables:")
-            print(f"   SMTP_HOST=smtp.gmail.com")
-            print(f"   SMTP_PORT=587")
-            print(f"   SMTP_USER=your-email@example.com")
-            print(f"   SMTP_PASS=your-app-password")
+            print("   ⚡ IMMEDIATE SOLUTION:")
+            print("   Update Railway variables:")
+            print("   SMTP_HOST=smtp.gmail.com")
+            print("   SMTP_PORT=587")
+            print("   SMTP_USER=your-email@example.com")
+            print("   SMTP_PASS=your-app-password")
         except Exception as e:
             print(f"❌ Connection error: {type(e).__name__}: {e}")
-            print(f"   Check SMTP_HOST and SMTP_PORT")
+            print("   Check SMTP_HOST and SMTP_PORT")
 else:
     print("⚠️  Skipping connection test - credentials not set")
 

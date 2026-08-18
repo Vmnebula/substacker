@@ -3,12 +3,11 @@ Security utilities for Substacker
 Handles file validation, rate limiting, CSRF protection, and input sanitization
 """
 
-import os
-import secrets
-import re
-from typing import Optional, Tuple
-from datetime import datetime, timedelta
 import logging
+import os
+import re
+import secrets
+from datetime import datetime, timedelta
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -68,7 +67,7 @@ class InputValidator:
         return bool(InputValidator.EMAIL_REGEX.match(email))
 
     @staticmethod
-    def validate_password(password: str) -> Tuple[bool, str]:
+    def validate_password(password: str) -> tuple[bool, str]:
         """Validate password strength"""
         if not password:
             return False, "Password required"
@@ -129,7 +128,7 @@ class FileValidator:
     """Validate file uploads"""
 
     @staticmethod
-    def validate_upload(filename: str, file_size: Optional[int] = None, content_type: Optional[str] = None) -> Tuple[bool, str]:
+    def validate_upload(filename: str, file_size: int | None = None, content_type: str | None = None) -> tuple[bool, str]:
         """
         Validate uploaded file for security and format
 
@@ -154,7 +153,7 @@ class FileValidator:
         return True, ""
 
     @staticmethod
-    def validate_csv_content(df_length: int, max_rows: int = SecurityConfig.MAX_FILE_ROWS) -> Tuple[bool, str]:
+    def validate_csv_content(df_length: int, max_rows: int = SecurityConfig.MAX_FILE_ROWS) -> tuple[bool, str]:
         """Validate CSV content"""
         if df_length == 0:
             return False, "Uploaded file is empty"
@@ -187,31 +186,31 @@ class CSRFProtection:
     def verify_token(token: str, session_id: str) -> bool:
         """Verify CSRF token"""
         if not token or token not in CSRFProtection._tokens:
-            logger.warning(f"CSRF token not found or invalid")
+            logger.warning("CSRF token not found or invalid")
             return False
 
         token_data = CSRFProtection._tokens[token]
 
         # Check session match
         if token_data['session_id'] != session_id:
-            logger.warning(f"CSRF token session mismatch")
+            logger.warning("CSRF token session mismatch")
             return False
 
         # Check expiry
         if datetime.now() - token_data['created_at'] > timedelta(seconds=CSRFProtection.TOKEN_EXPIRY):
-            logger.warning(f"CSRF token expired")
+            logger.warning("CSRF token expired")
             del CSRFProtection._tokens[token]
             return False
 
         # Check not already used
         if token_data['used']:
-            logger.warning(f"CSRF token already used")
+            logger.warning("CSRF token already used")
             return False
 
         # Mark as used
         token_data['used'] = True
 
-        logger.debug(f"CSRF token verified successfully")
+        logger.debug("CSRF token verified successfully")
         return True
 
     @staticmethod

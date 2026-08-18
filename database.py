@@ -1,7 +1,7 @@
+import json
 import sqlite3
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-import json
+
 
 class Database:
     def __init__(self, db_path: str = "leads.db"):
@@ -59,8 +59,8 @@ class Database:
     def add_lead(self, 
                  email: str, 
                  source: str = 'landing_page',
-                 ip_address: Optional[str] = None,
-                 user_agent: Optional[str] = None) -> Optional[int]:
+                 ip_address: str | None = None,
+                 user_agent: str | None = None) -> int | None:
         """Add new lead or update existing"""
         
         with sqlite3.connect(self.db_path) as conn:
@@ -97,7 +97,7 @@ class Database:
     def log_email_event(self, 
                         email: str, 
                         event_type: str, 
-                        metadata: Optional[Dict] = None):
+                        metadata: dict | None = None):
         """Log email events (sent, opened, clicked, etc.)"""
         
         with sqlite3.connect(self.db_path) as conn:
@@ -116,7 +116,7 @@ class Database:
     
     def save_analysis_results(self, 
                               email: str, 
-                              results: Dict):
+                              results: dict):
         """Save analysis results for a lead"""
         
         with sqlite3.connect(self.db_path) as conn:
@@ -150,7 +150,7 @@ class Database:
                 
                 conn.commit()
     
-    def get_lead_stats(self) -> Dict:
+    def get_lead_stats(self) -> dict:
         """Get lead statistics"""
         
         with sqlite3.connect(self.db_path) as conn:
@@ -189,7 +189,7 @@ class Database:
                 'conversion_rate': (analyzed_leads / total_leads * 100) if total_leads > 0 else 0
             }
     
-    def get_recent_leads(self, limit: int = 10) -> List[Dict]:
+    def get_recent_leads(self, limit: int = 10) -> list[dict]:
         """Get recent leads"""
         
         with sqlite3.connect(self.db_path) as conn:
@@ -313,7 +313,7 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
     
-    def verify_api_key(self, key_hash: str) -> Optional[str]:
+    def verify_api_key(self, key_hash: str) -> str | None:
         """Verify API key and return user email"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -353,7 +353,7 @@ class Database:
             
             conn.commit()
     
-    def get_realtime_team_costs(self, user_email: str, days: int = 30) -> Dict:
+    def get_realtime_team_costs(self, user_email: str, days: int = 30) -> dict:
         """Get team cost breakdown for real-time tracking users"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -374,7 +374,7 @@ class Database:
             
             return team_breakdown
     
-    def get_recent_usage(self, user_email: str, limit: int = 50) -> List[Dict]:
+    def get_recent_usage(self, user_email: str, limit: int = 50) -> list[dict]:
         """Get recent API calls for real-time dashboard"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -390,7 +390,7 @@ class Database:
             
             return [dict(row) for row in cursor.fetchall()]
     
-    def get_admin_by_email(self, email: str) -> Optional[Dict]:
+    def get_admin_by_email(self, email: str) -> dict | None:
         """Get admin user by email"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -415,7 +415,7 @@ class Database:
             except sqlite3.IntegrityError:
                 return False
     
-    def get_analysis_results_by_email(self, email: str) -> Optional[Dict]:
+    def get_analysis_results_by_email(self, email: str) -> dict | None:
         """Get analysis results for a specific email"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row

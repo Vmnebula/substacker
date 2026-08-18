@@ -4,9 +4,9 @@ Manages budget limits and enforcement actions for AI cost control.
 """
 
 import logging
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class BudgetEnforcer:
         user_email: str,
         budget_type: str,
         amount: float,
-        team: Optional[str] = None
+        team: str | None = None
     ) -> bool:
         """
         Set budget limit for a user or team.
@@ -88,14 +88,14 @@ class BudgetEnforcer:
             logger.error(f"Failed to set budget: {e}")
             return False
 
-    def get_user_budgets(self, user_email: str) -> List[Dict[str, Any]]:
+    def get_user_budgets(self, user_email: str) -> list[dict[str, Any]]:
         """Get all budget settings for a user"""
         return [
             budget for budget in self.budgets.values()
             if budget["user_email"] == user_email
         ]
 
-    def get_budget_status(self, user_email: str) -> Dict[str, Any]:
+    def get_budget_status(self, user_email: str) -> dict[str, Any]:
         """
         Get current budget status and usage.
 
@@ -155,7 +155,7 @@ class BudgetEnforcer:
 
         return status
 
-    def check_budget_limit(self, user_email: str, proposed_cost: float) -> Dict[str, Any]:
+    def check_budget_limit(self, user_email: str, proposed_cost: float) -> dict[str, Any]:
         """
         Check if a proposed usage would exceed budget.
 
@@ -195,7 +195,7 @@ class BudgetEnforcer:
         self,
         user_email: str,
         budget_type: str,
-        team: Optional[str] = None
+        team: str | None = None
     ) -> float:
         """Get current usage for a budget period"""
         try:
@@ -231,7 +231,7 @@ class BudgetEnforcer:
         else:
             return "healthy"
 
-    def _save_budget_to_db(self, key: str, budget: Dict[str, Any]):
+    def _save_budget_to_db(self, key: str, budget: dict[str, Any]):
         """Save budget to database"""
         try:
             # Placeholder - implement based on actual database schema
@@ -244,8 +244,8 @@ class BudgetEnforcer:
         self,
         user_email: str,
         cost: float,
-        team: Optional[str] = None
-    ) -> Dict[str, Any]:
+        team: str | None = None
+    ) -> dict[str, Any]:
         """
         Enforce budget limits and return action to take.
 
@@ -282,7 +282,7 @@ class BudgetEnforcer:
             "allowed": True
         }
 
-    def get_budget_forecast(self, user_email: str, days_ahead: int = 30) -> Dict[str, Any]:
+    def get_budget_forecast(self, user_email: str, days_ahead: int = 30) -> dict[str, Any]:
         """
         Forecast budget usage for the next N days.
 
