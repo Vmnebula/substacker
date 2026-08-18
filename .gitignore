@@ -46,3 +46,6 @@ leads_backup_.db
 build/
 dist/
 *.egg-info/
+
+# Large media belongs on releases, not in git history
+docs/assets/*.gif

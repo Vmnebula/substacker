@@ -12,7 +12,7 @@ single FastAPI service with either a zero-configuration SQLite database or Supab
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg)](pyproject.toml)
 
-![Substacker dashboard](docs/assets/demo.gif)
+![Substacker dashboard](https://github.com/Vmnebula/substacker/releases/download/v0.1.0/demo.gif)
 
 ## Contents
 

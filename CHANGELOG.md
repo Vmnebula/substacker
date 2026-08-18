@@ -30,6 +30,12 @@ First tagged release. Establishes a baseline for the existing codebase.
   module. The previous `setup.py` produced an empty distribution.
 - Documentation rewritten to describe the API that actually exists.
 
+### Removed
+
+- `docs/assets/demo.gif` and its history. The 12 MB file accounted for almost all of
+  the repository size and was downloaded on every clone. It is now attached to the
+  release and referenced from the README by URL.
+
 ### Fixed
 
 - Two route handlers shared the name `realtime_dashboard`, making the first
