@@ -382,16 +382,23 @@ response = openai.chat.completions.create(
                         </div>
                         <div class="team-table">
                             <table id="teamTable">
+                                <caption class="visually-hidden">
+                                    Monthly cost and estimated carbon emissions by team.
+                                    Carbon is an estimate covering only calls to models with a
+                                    published emissions figure.
+                                </caption>
                                 <thead>
                                     <tr>
-                                        <th>Team</th>
-                                        <th>Monthly Cost</th>
-                                        <th>% of Total</th>
+                                        <th scope="col">Team</th>
+                                        <th scope="col">Monthly Cost</th>
+                                        <th scope="col">Est. CO<sub>2</sub>e</th>
+                                        <th scope="col">% of Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="teamTableBody">
                                 </tbody>
                             </table>
+                            <p class="carbon-caveat" id="teamCarbonCaveat"></p>
                         </div>
                     </div>
                 </div>
@@ -438,6 +445,20 @@ response = openai.chat.completions.create(
                                 <div class="card-content">
                                     <span class="card-label">Cost Visibility</span>
                                     <span class="card-value" id="monthlySavings">Active</span>
+                                </div>
+                            </div>
+
+                            <!-- Carbon sits beside cost because it is the same telemetry in
+                                 another unit. The coverage line under it is not a disclaimer
+                                 to be tucked away: without it the total is an understatement. -->
+                            <div class="summary-card carbon">
+                                <div class="card-icon">
+                                    <i class="fas fa-leaf" aria-hidden="true"></i>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-label">Estimated CO<sub>2</sub>e</span>
+                                    <span class="card-value" id="carbonTotal">Not estimated</span>
+                                    <span class="card-note" id="carbonCoverage"></span>
                                 </div>
                             </div>
                         </div>

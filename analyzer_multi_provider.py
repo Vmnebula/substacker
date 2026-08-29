@@ -8,6 +8,7 @@ from typing import Any
 
 import pandas as pd
 
+import carbon
 from cost_analyzer import CostAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,29 @@ class MultiProviderAnalyzer:
             }
 
         return pricing_info
+
+    def get_all_provider_emissions(self) -> dict[str, Any]:
+        """Published emissions factors, grouped by provider, plus who publishes nothing.
+
+        The mirror image of `get_all_provider_pricing`, and deliberately not the same
+        shape underneath: every model has a price, almost none has a published emissions
+        figure. Providers with no figure are returned explicitly rather than omitted, so
+        a caller rendering this cannot mistake silence for zero.
+        """
+        report = carbon.factor_coverage_report()
+
+        by_provider: dict[str, Any] = {}
+        for model_name, factor in report["models"].items():
+            provider = factor["provider"]
+            entry = by_provider.setdefault(provider, {"model_count": 0, "models": []})
+            entry["model_count"] += 1
+            entry["models"].append({"name": model_name, **factor})
+
+        return {
+            "by_provider": by_provider,
+            "providers_without_published_figures": report["providers_without_published_figures"],
+            "methodology": report["methodology"],
+        }
 
     def compare_providers(self, usage_data: list[dict[str, Any]]) -> dict[str, Any]:
         """

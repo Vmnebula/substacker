@@ -12,6 +12,8 @@ from enum import Enum
 import pandas as pd
 from cachetools import LRUCache
 
+from carbon import CarbonCoverage, estimate_emissions
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -462,7 +464,8 @@ YOUR COLUMNS: {', '.join(df.columns)}
             return {
                 'total_cost': 0, 'total_requests': 0, 'waste_identified': 0,
                 'savings_potential': 0, 'patterns': [], 'recommendations': [],
-                'team_breakdown': {}, 'error': error_msg.strip()
+                'team_breakdown': {}, 'carbon': CarbonCoverage().to_dict(),
+                'error': error_msg.strip()
             }
         
         # Initialize results
@@ -471,6 +474,7 @@ YOUR COLUMNS: {', '.join(df.columns)}
             'waste_identified': 0, 'savings_potential': 0,
             'patterns': [], 'recommendations': [],
             'team_breakdown': {}, 'provider_breakdown': {},
+            'carbon': CarbonCoverage().to_dict(),
             'auto_generated_teams': self.auto_generated_mapping,
             'unknown_models': list(self.unknown_models)
         }
@@ -485,7 +489,16 @@ YOUR COLUMNS: {', '.join(df.columns)}
         total_cost = Decimal('0')
         team_costs = {}
         provider_costs = {}
-        
+
+        # Carbon runs alongside the cost pass over the same rows: same model, same token
+        # counts, different unit. It never feeds back into a cost figure, and an
+        # unmeasured model contributes nothing to the total but does count against
+        # coverage. See carbon.py and docs/CARBON-METHODOLOGY.md.
+        carbon_total = CarbonCoverage()
+        team_carbon: dict[str, CarbonCoverage] = {}
+        provider_carbon: dict[str, CarbonCoverage] = {}
+        model_carbon: dict[str, CarbonCoverage] = {}
+
         for idx, row in df.iterrows():
             # Validate tokens
             prompt_tokens = self._validate_tokens(row.get('prompt_tokens', 0), 'prompt_tokens', idx)
@@ -510,7 +523,14 @@ YOUR COLUMNS: {', '.join(df.columns)}
             provider_costs[provider]['cost'] += cost
             provider_costs[provider]['requests'] += 1
             provider_costs[provider]['tokens'] += prompt_tokens + completion_tokens
-        
+
+            # Aggregate carbon over the same dimensions
+            estimate = estimate_emissions(model_name, prompt_tokens, completion_tokens)
+            carbon_total.add(estimate)
+            team_carbon.setdefault(team, CarbonCoverage()).add(estimate)
+            provider_carbon.setdefault(provider, CarbonCoverage()).add(estimate)
+            model_carbon.setdefault(str(model_name), CarbonCoverage()).add(estimate)
+
         # Convert to float for JSON serialization
         results['total_cost'] = float(total_cost)
         results['team_breakdown'] = {k: float(v) for k, v in sorted(team_costs.items(), key=lambda x: x[1], reverse=True)}
@@ -518,7 +538,30 @@ YOUR COLUMNS: {', '.join(df.columns)}
             k: {'cost': float(v['cost']), 'requests': v['requests'], 'tokens': v['tokens']}
             for k, v in sorted(provider_costs.items(), key=lambda x: x[1]['cost'], reverse=True)
         }
-        
+
+        # Carbon, in the same shape as the cost breakdowns. Each level carries its own
+        # coverage, because a team running only Claude has a real total of "unknown"
+        # while a team on Gemini has a real number, and averaging the two would hide it.
+        results['carbon'] = carbon_total.to_dict()
+        results['carbon']['team_breakdown'] = {
+            team: coverage.to_dict(include_methodology=False)
+            for team, coverage in sorted(
+                team_carbon.items(), key=lambda x: x[1].total_gco2e, reverse=True
+            )
+        }
+        results['carbon']['provider_breakdown'] = {
+            provider: coverage.to_dict(include_methodology=False)
+            for provider, coverage in sorted(
+                provider_carbon.items(), key=lambda x: x[1].total_gco2e, reverse=True
+            )
+        }
+        results['carbon']['model_breakdown'] = {
+            model: coverage.to_dict(include_methodology=False)
+            for model, coverage in sorted(
+                model_carbon.items(), key=lambda x: x[1].total_gco2e, reverse=True
+            )
+        }
+
         # Run waste pattern detection
         # Note: These methods detect optimization opportunities
         # They use the full DataFrame with all data
