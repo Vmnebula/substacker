@@ -268,8 +268,11 @@
     document.getElementById('savingsPercentage').textContent = (results.savings_potential).toFixed(2) + '%';
     document.getElementById('monthlySavings').textContent = 'Active';
     
+    // Display carbon beside cost, coverage caveat included
+    displayCarbonSummary(results.carbon);
+
     // Display team breakdown (MVP Feature)
-    displayTeamBreakdown(results.team_breakdown, results.total_cost);
+    displayTeamBreakdown(results.team_breakdown, results.total_cost, results.carbon);
     
     // Update beta section with savings
     updateBetaSection(results);
@@ -316,15 +319,22 @@
     form.reset();
 }
 
-    function displayTeamBreakdown(teamBreakdown, totalCost) {
+    function displayTeamBreakdown(teamBreakdown, totalCost, carbon) {
     const teamTableBody = document.getElementById('teamTableBody');
+    const caveatEl = document.getElementById('teamCarbonCaveat');
     teamTableBody.innerHTML = '';
-    
+    if (caveatEl) caveatEl.textContent = '';
+
     if (!teamBreakdown || Object.keys(teamBreakdown).length === 0) {
-        teamTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">No team data available. Add a "team" column to your data for better insights.</td></tr>';
+        teamTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #767676;">No team data available. Add a "team" column to your data for better insights.</td></tr>';
         return;
     }
-    
+
+    const carbonTeams = (carbon && carbon.team_breakdown) || {};
+    if (caveatEl && carbon && carbon.caveat) {
+        caveatEl.textContent = 'Carbon: ' + carbon.caveat;
+    }
+
     // Create color palette for teams
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
     let colorIndex = 0;
@@ -337,12 +347,26 @@
     
     Object.entries(teamBreakdown).forEach(([team, cost]) => {
         const percentage = (cost / totalCost * 100).toFixed(1);
-        
+        const teamCarbon = carbonTeams[team];
+
+        // Carbon cell carries its own coverage, because one team can be fully covered
+        // while the next runs entirely on models nobody publishes figures for.
+        let carbonCell = 'Not published';
+        let carbonTitle = 'No published emissions figure covers this team\'s models.';
+        if (teamCarbon) {
+            carbonCell = formatCarbon(teamCarbon.total_gco2e);
+            carbonTitle = teamCarbon.caveat || carbonTitle;
+            if (teamCarbon.total_gco2e !== null && !teamCarbon.is_complete) {
+                carbonCell += ` <span class="carbon-partial">(${teamCarbon.coverage_percent}% covered)</span>`;
+            }
+        }
+
         // Add table row
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><strong>${team}</strong></td>
             <td>${formatCurrency(cost)}</td>
+            <td><span title="${carbonTitle}">${carbonCell}</span></td>
             <td>${percentage}%</td>
         `;
         teamTableBody.appendChild(row);
@@ -758,6 +782,34 @@
     function formatCurrency(amount) {
     if (!amount) return '$0.00';
     return '$' + (Math.round(amount * 100) / 100).toFixed(2);
+}
+
+    // ===== CARBON =====
+
+    // gCO2e is null, never zero, when nothing in the set ran on a model with a published
+    // emissions figure. Rendering null as "0 g" would read as clean when the truth is
+    // that we cannot say, so the unknown state gets its own text.
+    function formatCarbon(grams) {
+    if (grams === null || grams === undefined) return 'Not published';
+    if (grams >= 1000) return (grams / 1000).toFixed(2) + ' kg';
+    if (grams >= 1) return grams.toFixed(1) + ' g';
+    return grams.toFixed(3) + ' g';
+}
+
+    function displayCarbonSummary(carbon) {
+    const totalEl = document.getElementById('carbonTotal');
+    const coverageEl = document.getElementById('carbonCoverage');
+    if (!totalEl || !coverageEl) return;
+
+    if (!carbon || !carbon.total_requests) {
+        totalEl.textContent = 'Not estimated';
+        coverageEl.textContent = 'No calls analysed.';
+        return;
+    }
+
+    totalEl.textContent = formatCarbon(carbon.total_gco2e);
+    // The caveat travels with the number. It is the feature, not the small print.
+    coverageEl.textContent = carbon.caveat || '';
 }
 
     // ===== COLLAPSIBLE SECTIONS =====

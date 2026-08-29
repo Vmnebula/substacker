@@ -30,6 +30,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+import carbon
 from auth import create_access_token, get_password_hash, verify_password, verify_token
 from cost_analyzer import CostAnalyzer
 from database import Database
@@ -577,18 +578,29 @@ async def get_costs_by_team(email: str | None = None):
         # Return team breakdown with total cost and percentages
         team_breakdown = {}
         total_cost = results.get('total_cost', 0)
-        
+
+        # Carbon rides along per team. `gco2e` is null where no call in that team ran on
+        # a model with a published factor, and `carbon_coverage_percent` says how much of
+        # the team's traffic the figure actually accounts for. Render both or neither.
+        carbon_results = results.get('carbon') or {}
+        carbon_teams = carbon_results.get('team_breakdown', {})
+
         for team, cost in results.get('team_breakdown', {}).items():
             percentage = (cost / total_cost * 100) if total_cost > 0 else 0
+            team_carbon = carbon_teams.get(team, {})
             team_breakdown[team] = {
                 'cost': round(cost, 2),
-                'percentage': round(percentage, 1)
+                'percentage': round(percentage, 1),
+                'gco2e': team_carbon.get('total_gco2e'),
+                'carbon_coverage_percent': team_carbon.get('coverage_percent'),
+                'carbon_caveat': team_carbon.get('caveat'),
             }
-        
+
         return JSONResponse({
             'success': True,
             'total_cost': round(total_cost, 2),
             'team_breakdown': team_breakdown,
+            'carbon': carbon_results,
             'timestamp': results.get('timestamp')
         })
     except Exception as e:
@@ -596,6 +608,17 @@ async def get_costs_by_team(email: str | None = None):
             status_code=500,
             content={"error": f"Failed to get team costs: {str(e)}"}
         )
+
+@app.get("/api/carbon/factors")
+async def get_carbon_factors():
+    """Every published emissions factor Substacker holds, and every gap in the set.
+
+    Public and unauthenticated on purpose: anyone quoting a gCO2e figure this product
+    produced should be able to check where it came from, including the providers that
+    publish nothing at all.
+    """
+    return JSONResponse(carbon.factor_coverage_report())
+
 
 @app.get("/export/csv")
 async def export_csv(email: str | None = None, admin_email: str = Depends(verify_admin)):
@@ -778,12 +801,25 @@ async def track_usage(request: Request, user_email: str = Depends(verify_api_key
             response_time=response_time
         )
         
+        # Estimate carbon from the same telemetry. `gco2e` is null, never 0, when no
+        # published factor covers the model: see docs/CARBON-METHODOLOGY.md.
+        estimate = carbon.estimate_emissions(model, prompt_tokens, completion_tokens)
+
         # Build response with unknown model warning
         response_data = {
             "status": "tracked",
             "cost": round(cost, 4),
             "provider": analyzer_instance._detect_provider(model).value,
-            "model_recognized": is_known
+            "model_recognized": is_known,
+            "carbon": {
+                "gco2e": float(estimate.gco2e) if estimate.is_known else None,
+                "provenance": estimate.provenance.value,
+                "basis": estimate.basis.value,
+                "source": estimate.source,
+                "published": estimate.published,
+                "scope": estimate.scope,
+                "reason": estimate.reason,
+            },
         }
         
         # Add warning if model is unknown
